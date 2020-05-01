@@ -3,12 +3,29 @@ import ReactDOM from 'react-dom';
 import './index.css';
 
 class Entry extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {value: ''};
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleChange(event) {
+    this.setState({value: event.target.value});
+  }
+
+  handleSubmit(event) {
+    alert('I accept your truth: ' + this.state.value);
+    event.preventDefault();
+  }
+
   render() {
     return (
-      <form>
+      <form onSubmit={this.handleSubmit}>
         <label>
           What is your truth?
-          <input type="text" />
+          <input type="text" value={this.state.value} onChange={this.handleChange} name="truth" />
         </label>
         <input type="submit" value="Testify" />
       </form>
@@ -16,15 +33,49 @@ class Entry extends React.Component {
   }
 }
 
-class Display extends React.Component {
+class Truth extends React.Component {
   render() {
-    const archive = ["I like sunlight more than rain", "I cried at the temple at Burning Man", "Your silence will not protect you", "Selfishness",];
+    return (
+      <button
+        className="truth"
+        onClick={() => this.props.onClick()}
+      >
+        {this.props.value}
+      </button>
+    );
+  }
+}
+
+class Display extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      archive: ["I like sunlight more than rain", "I cried at the temple at Burning Man", "Your silence will not protect you", "Selfishness", "There is a war going on", "Gender is a myth"]
+    };
+  }
+
+  handleClick(i) {
+    const archive = this.state.archive.slice();
+    archive[i] = "Truth";
+    this.setState({archive: archive});
+  }
+
+  renderTruth(i) {
+    return (
+      <Truth 
+        value={this.state.archive[i]} 
+        onClick={() => this.handleClick(i)}
+      />
+    );
+  }
+
+  render() {
+    const archive = this.state.archive;
 
     let archiveList = Array(0);
 
     for (let i = 0; i < archive.length; i++) {
-      let listItem = <li>{archive[i]}</li>;
-      archiveList.push(listItem);
+      archiveList.push(<li>{this.renderTruth(i)}</li>);
     };
 
     return (
