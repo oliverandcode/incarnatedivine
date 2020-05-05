@@ -2,11 +2,29 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
+export function Truth(props) {
+  return(
+    <li>{props.value}</li>
+  );
+}
+
+export function Display(props) {
+  return(
+    <ul>
+      {props.archiveDisplay.map(
+        (theTruth) => 
+        (<Truth value={theTruth} />)
+      )}
+    </ul>
+  );
+}
+
 class Entry extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {value: ''};
-
+    this.state = {
+      value: '',
+    };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
@@ -16,83 +34,50 @@ class Entry extends React.Component {
   }
 
   handleSubmit(event) {
-    alert('I accept your truth: ' + this.state.value);
-    event.preventDefault();
+    alert('wrong handler: ' + this.state.value);
   }
 
   render() {
     return (
-      <form onSubmit={this.handleSubmit}>
+      <form>
         <label>
           What is your truth?
           <input type="text" value={this.state.value} onChange={this.handleChange} name="truth" />
         </label>
-        <input type="submit" value="Testify" />
+
+        <input type="button" value="Testify" onClick={(e) => this.props.onClick(this.state.value)} />
+
       </form>
     );
   }
 }
 
-class Truth extends React.Component {
-  render() {
-    return (
-      <button
-        className="truth"
-        onClick={() => this.props.onClick()}
-      >
-        {this.props.value}
-      </button>
-    );
-  }
-}
-
-class Display extends React.Component {
+class TruthCapture extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      archive: ["I like sunlight more than rain", "I cried at the temple at Burning Man", "Your silence will not protect you", "Selfishness", "There is a war going on", "Gender is a myth"]
+      archiveCapture: ["I like sunlight more than rain", "I cried at the temple at Burning Man", "Your silence will not protect you", "Selfishness", "There is a war going on", "Gender is a myth"],
     };
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleClick(i) {
-    const archive = this.state.archive.slice();
-    archive[i] = "Truth";
-    this.setState({archive: archive});
-  }
-
-  renderTruth(i) {
-    return (
-      <Truth 
-        value={this.state.archive[i]} 
-        onClick={() => this.handleClick(i)}
-      />
-    );
+  handleSubmit(truthText) {
+    alert(truthText);
+    let archiveSubmit = this.state.archiveCapture.slice();
+    archiveSubmit.push(truthText);
+    this.setState({archiveCapture: archiveSubmit});
   }
 
   render() {
-    const archive = this.state.archive;
+    const archiveArchive = this.state.archiveCapture;
 
-    let archiveList = Array(0);
-
-    for (let i = 0; i < archive.length; i++) {
-      archiveList.push(<li>{this.renderTruth(i)}</li>);
-    };
-
-    return (
-      <ul>{archiveList}</ul>
-    );
-  }
-}
-
-class TruthCapture extends React.Component {
-  render() {
     return (
       <div>
         <div className="display">
-          <Display />
+          <Display archiveDisplay={archiveArchive} />
         </div>
         <div className="entry">
-          <Entry />
+          <Entry onClick={this.handleSubmit} />
         </div>
       </div>
     );
