@@ -26,15 +26,10 @@ class Entry extends React.Component {
       value: '',
     };
     this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   handleChange(event) {
     this.setState({value: event.target.value});
-  }
-
-  handleSubmit(event) {
-    alert('wrong handler: ' + this.state.value);
   }
 
   render() {
@@ -62,7 +57,6 @@ class TruthCapture extends React.Component {
   }
 
   handleSubmit(truthText) {
-    alert(truthText);
     let archiveSubmit = this.state.archiveCapture.slice();
     archiveSubmit.push(truthText);
     this.setState({archiveCapture: archiveSubmit});
