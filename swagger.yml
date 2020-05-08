@@ -1,0 +1,45 @@
+#### notes found @ https://realpython.com/flask-connexion-rest-api/
+
+swagger: "2.0" # tells Connexion what version of the Swagger API is being used
+info: # begins a new ‘scope’ of information about the API being built
+  description: This is the swagger file that goes with our server code # a user defined description of what the API provides or is about. This is in the Connexion generated UI system
+  version: "1.0.0" # a user defined version value for the API
+  title: Truth Capture App # a user defined title included in the Connexion generated UI system
+consumes: # tells Connexion what MIME type is expected by the API
+  - "application/json"
+produces: # tells Connexion what content type is expected by the caller of the API
+  - "application/json"
+
+basePath: "/api" # "/api" defines the root of the API, kind of like a namespace the REST API will come from
+
+####
+# This section begins the configuration of the API URL endpoint paths:
+
+# Paths supported by the server application
+paths: # defines the section of the configuration containing all of the API REST endpoints
+  '/truths': # defines one path of your URL endpoint
+    get: # defines the HTTP method this URL endpoint will respond to. Together with the previous definitions, this creates the GET /api/truths URL endpoint
+
+    ####
+    # This section begins the configuration of the single /api/truths URL endpoint:
+      operationId: "truths.read" # "truths.read" defines the Python import path/function that will respond to an HTTP GET /api/truths request. The "truths.read" portion can go as deep as you need to in order to connect a function to the HTTP request. Something like "<package_name>.<package_name>.<package_name>.<function_name>" would work just as well. You’ll create this shortly.
+      tags: # defines a grouping for the UI interface. All the CRUD methods you’ll define for the truths endpoint will share this tag definition
+        - "Truths"
+      summary: "The truths data structure supported by the server application" # defines the UI interface display text for this endpoint
+      description: "Read the list of truths" # defines what the UI interface will display for implementation notes
+
+      ####
+      # This section defines the section of the configuration of a successful response from the URL endpoint:
+      responses: # defines the beginning of the expected response section
+        200: # defines the section for a successful response, HTTP status code 200
+          description: "Successful read truths list operation" # defines the UI interface display text for a response of 200
+          schema: # defines the response as a schema, or structure
+            type: "array" # defines the structure of the schema as an array
+            items: # starts the definition of the items in the array
+              properties: # defines the items in the array as objects having key/value pairs
+                truthtext: # defines the first key of the object
+                  type: "string" # defines the value associated with truthtext as a string
+                hexcode: # defines the second key of the object
+                  type: "string" # defines the value associated with hexcode as a string
+                timestamp: # defines the third key of the object
+                  type: "string" # defines the value associated with timestamp as a string
