@@ -4,48 +4,47 @@ swagger: "2.0" # tells Connexion what version of the Swagger API is being used
 info: 
   description: This is the swagger file that goes with our server code 
   version: "1.0.0" # a user defined version value for the API
-  title: Truth Capture App # a user defined title included in the Connexion generated UI system
+  title: Truth Acceptance App # a user defined title included in the Connexion generated UI system
 consumes: 
-  - "application/json"
+  - application/json
 produces: 
-  - "application/json"
+  - application/json
 
 basePath: "/api" 
 
-# Paths supported by the server application
 paths: 
-  '/truths': 
+  /truths: 
     get: 
-      operationId: "truths.read_all" # "truths.read_all" defines the Python import path/function that will respond to an HTTP GET /api/truths request. The "truths.read_all" portion can go as deep as you need to in order to connect a function to the HTTP request. Something like "<package_name>.<package_name>.<package_name>.<function_name>" would work just as well. 
+      operationId: truths.read_all # "truths.read_all" defines the Python import path/function that will respond to an HTTP GET /api/truths request. The "truths.read_all" portion can go as deep as you need to in order to connect a function to the HTTP request. Something like "<package_name>.<package_name>.<package_name>.<function_name>" would work just as well. 
       tags: 
-        - "Truths"
-      summary: "Read the entire list of truths" 
-      description: "Read the list of truths" 
+        - Truths
+      summary: Read the entire list of truths
+      description: Read the entire list of truths
       parameters:
         - name: length
           in: query
           type: integer
-          description: "Number of truths to get from truths"
-          required: false
+          description: Number of truths to get from truths
+          required: False
         - name: offset
           in: query
           type: integer
-          description: "Offset from beginning of list where to start gathering truths"
-          required: false
+          description: Offset from beginning of list where to start gathering truths
+          required: False
       # This section defines the section of the configuration of a successful response from the URL endpoint:
       responses: # defines the beginning of the expected response section
         200: # defines the section for a successful response, HTTP status code 200
-          description: "Successfully read truths list operation" # defines the UI interface display text for a response of 200
+          description: Successfully read entire truths list operation # defines the UI interface display text for a response of 200
           schema: # defines the response as a schema, or structure
-            type: "array" # defines the structure of the schema as an array
+            type: array # defines the structure of the schema as an array
             items: 
               properties: # defines the items in the array as objects having key/value pairs
                 truthtext: # defines the first key of the object
-                  type: "string" # defines the value associated with truthtext as a string
+                  type: string # defines the value associated with truthtext as a string
                 hexcode: 
-                  type: "string" 
+                  type: string
                 timestamp: 
-                  type: "string" 
+                  type: string
 
     post:
       operationId: truths.create
