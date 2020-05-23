@@ -82,14 +82,13 @@ def create(truth):
             "timestamp": get_timestamp(),
         }
         return make_response(
-            "{hexcode} successfully created".format(hexcode=hexcode), 201
+            201, "{hexcode} successfully created".format(hexcode=hexcode),
         )
 
     # Otherwise, it exists, that's an error
     else:
         abort(
-            406,
-            "Truth with hex code {hexcode} already exists".format(hexcode=hexcode),
+            406, "Truth with hex code {hexcode} already exists".format(hexcode=hexcode),
         )
 
 def update(hexcode, truth):
@@ -127,7 +126,7 @@ def delete(hexcode):
         del TRUTHS[hexcode]
         
         return make_response(
-            "{hexcode} successfully deleted".format(hexcode=hexcode), 200
+            200, "{hexcode} successfully deleted".format(hexcode=hexcode),
         )
 
     # Otherwise, nope, truth to delete not found
