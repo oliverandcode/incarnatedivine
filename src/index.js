@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import axios from 'axios';
 
 export function Truth(props) {
   return(
@@ -60,6 +61,14 @@ class TruthCapture extends React.Component {
     let archiveSubmit = this.state.archiveCapture.slice();
     archiveSubmit.push(truthText);
     this.setState({archiveCapture: archiveSubmit});
+  }
+
+  async componentDidMount() {
+    console.log("truth capture app loaded");
+
+    const remoteTruths = await axios.get("http://localhost:5000/api/truths");
+    console.log("[truthcapture/componentDidMount]: truths received:", remoteTruths);
+    this.setState({ archiveCapture: remoteTruths });
   }
 
   render() {
