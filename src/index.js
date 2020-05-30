@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import axios from 'axios';
+import moment from 'moment';
 
 export function Truth(props) {
   return(
@@ -14,15 +15,13 @@ export function Truth(props) {
 }
 
 export function Display(props) {
-  console.log("props.archiveDisplay", props.archiveDisplay);
-
   return(
     <div id="table">
-      <h1 id="title">List of Truths</h1>
-      <table id="truths">
+      <h1 id="list-title">List of Truths</h1>
+      <table id="truthtable">
         <thead></thead>
         <tbody>
-          <tr>
+          <tr id="table-head-row">
             <th>Truth</th>
             <th>Hex</th>
             <th>Time</th>
@@ -44,24 +43,35 @@ class Entry extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: '',
+      truthtext: '',
+      hexcode: '',
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(event) {
-    this.setState({value: event.target.value});
+    if (event.target.name === "truthtext") {
+      this.setState({truthtext: event.target.value})
+    } else if (event.target.name === "hexcode") {
+      this.setState({hexcode: event.target.value})
+    }
   }
 
   render() {
     return (
       <form>
-        <label>
+        <label htmlFor="truthtext">
           What is your truth?
-          <input type="text" value={this.state.value} onChange={this.handleChange} name="truth" />
+          <input type="text" value={this.state.truthtext} onChange={this.handleChange} name="truthtext" />
         </label>
+        <br />
+        <label htmlFor="hexcode">
+          Pick a color:
+          <input type="text" value={this.state.hexcode} onChange={this.handleChange} name="hexcode" />
+        </label>
+        <br />
 
-        <input type="button" value="Testify" onClick={(e) => this.props.onClick(this.state.value)} />
+        <input type="button" value="Testify" onClick={(e) => this.props.onClick(this.state.truthtext, this.state.hexcode)} />
 
       </form>
     );
@@ -73,23 +83,33 @@ class TruthCapture extends React.Component {
     super(props);
     this.state = {
       archiveCapture: [
-        // array of objects
         {hexcode: "yellow", timestamp: "2020-05-28 10:00:00", truthtext: "I like sunlight more than rain"},
         {hexcode: "greyblue", timestamp: "2020-05-28 10:00:00", truthtext: "I cried at the temple at Burning Man"},
         {hexcode: "000000", timestamp: "2020-05-28 10:00:00", truthtext: "Your silence will not protect you"},
         {hexcode: "green", timestamp: "2020-05-28 10:00:00", truthtext: "Selfishness"},
         {hexcode: "red", timestamp: "2020-05-28 10:00:00", truthtext: "There is a war going on"},
         {hexcode: "millennialpink", timestamp: "2020-05-28 10:00:00", truthtext: "Gender is a myth"}
-        // original array of strings:
-        // "I like sunlight more than rain", "I cried at the temple at Burning Man", "Your silence will not protect you", "Selfishness", "There is a war going on", "Gender is a myth"
       ],
     };
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleSubmit(truthText) {
+  handleSubmit(truthtext, hexcode) {
     let archiveSubmit = this.state.archiveCapture.slice();
-    archiveSubmit.push(truthText);
+
+    if (truthtext && hexcode) {
+      if (hexcode in archiveSubmit) {
+        console.log("error: ", "truth with hexcode already exists")
+      } else {
+        const timestamp = moment().format('YYYY-MM-DD hh:mm:ss');
+        archiveSubmit.push(
+          {hexcode: hexcode, timestamp: timestamp, truthtext: truthtext}
+        )
+      }
+    } else {
+      console.log("error: ", "problem with truthtext or hexcode input")
+    }
+
     this.setState({archiveCapture: archiveSubmit});
   }
 
@@ -97,7 +117,7 @@ class TruthCapture extends React.Component {
     console.log("truth capture app loaded");
 
     const remoteTruths = await axios.get("http://localhost:5000/api/truths");
-    console.log("[truthcapture/componentDidMount]: truths received:", remoteTruths);
+    console.log("[truthcapture/componentDidMount]: truths received:", remoteTruths.data);
     this.setState({ archiveCapture: remoteTruths.data });
   }
 
@@ -105,12 +125,14 @@ class TruthCapture extends React.Component {
     const archiveArchive = this.state.archiveCapture;
 
     return (
-      <div>
-        <div className="display">
-          <Display archiveDisplay={archiveArchive} />
-        </div>
-        <div className="entry">
-          <Entry onClick={this.handleSubmit} />
+      <div className="container">
+        <div id="truthcapture">
+          <div className="entry">
+            <Entry onClick={this.handleSubmit} />
+          </div>
+          <div className="display">
+            <Display archiveDisplay={archiveArchive} />
+          </div>
         </div>
       </div>
     );

@@ -2,3 +2,7 @@ body {
   margin: 0;
   font: 14px "Century Gothic", Futura, sans-serif;
 }
+
+.container {
+  padding: 10px;
+}
