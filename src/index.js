@@ -6,7 +6,7 @@ import moment from 'moment';
 
 export function Truth(props) {
   return(
-    <tr key={props.hexcode}>
+    <tr>
       <td>{props.truthtext}</td>
       <td>{props.hexcode}</td>
       <td>{props.timestamp}</td>
@@ -28,7 +28,7 @@ export function Display(props) {
           </tr>
             {props.archiveDisplay.map(
               (truth) =>
-              (<Truth 
+              (<Truth key={truth.hexcode}
                 hexcode={truth.hexcode} 
                 truthtext={truth.truthtext} 
                 timestamp={truth.timestamp} />)
@@ -36,7 +36,7 @@ export function Display(props) {
         </tbody>
       </table>
     </div>
-  )  
+  );  
 }
 
 class Entry extends React.Component {
@@ -51,9 +51,9 @@ class Entry extends React.Component {
 
   handleChange(event) {
     if (event.target.name === "truthtext") {
-      this.setState({truthtext: event.target.value})
+      this.setState({truthtext: event.target.value});
     } else if (event.target.name === "hexcode") {
-      this.setState({hexcode: event.target.value})
+      this.setState({hexcode: event.target.value});
     }
   }
 
@@ -71,7 +71,8 @@ class Entry extends React.Component {
         </label>
         <br />
 
-        <input type="button" value="Testify" onClick={(e) => this.props.onClick(this.state.truthtext, this.state.hexcode)} />
+        <input type="button" value="Testify" onClick={(e) => this.props.onSubmit(this.state.truthtext, this.state.hexcode)} />
+        <input type="button" value="Update" onClick={(e) => this.props.onUpdate(this.state.truthtext, this.state.hexcode)} />
 
       </form>
     );
@@ -88,29 +89,62 @@ class TruthCapture extends React.Component {
         {hexcode: "000000", timestamp: "2020-05-28 10:00:00", truthtext: "Your silence will not protect you"},
         {hexcode: "green", timestamp: "2020-05-28 10:00:00", truthtext: "Selfishness"},
         {hexcode: "red", timestamp: "2020-05-28 10:00:00", truthtext: "There is a war going on"},
-        {hexcode: "millennialpink", timestamp: "2020-05-28 10:00:00", truthtext: "Gender is a myth"}
+        {hexcode: "millennialpink", timestamp: "2020-05-28 10:00:00", truthtext: "Gender is a myth"},
       ],
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleUpdate = this.handleUpdate.bind(this);
+  }
+
+  existence(hexcode) {
+    let archiveExist = this.state.archiveCapture.slice();
+    let arrayHex = archiveExist.map(item => item.hexcode);
+    let i = arrayHex.indexOf(hexcode);
+    if (arrayHex[i]) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   handleSubmit(truthtext, hexcode) {
     let archiveSubmit = this.state.archiveCapture.slice();
-
+    
     if (truthtext && hexcode) {
-      if (hexcode in archiveSubmit) {
-        console.log("error: ", "truth with hexcode already exists")
+      if (this.existence(hexcode)) {
+        console.log("error: ", "truth with hexcode already exists");
       } else {
-        const timestamp = moment().format('YYYY-MM-DD hh:mm:ss');
+        const timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
         archiveSubmit.push(
           {hexcode: hexcode, timestamp: timestamp, truthtext: truthtext}
-        )
+        );
       }
     } else {
-      console.log("error: ", "problem with truthtext or hexcode input")
+      console.log("error: ", "problem with truthtext or hexcode input");
     }
 
     this.setState({archiveCapture: archiveSubmit});
+  }
+
+  handleUpdate(truthtext, hexcode) {
+    let archiveUpdate = this.state.archiveCapture.slice();
+    let arrayHex = archiveUpdate.map(item => item.hexcode);
+
+    if (truthtext && hexcode) {
+      if (this.existence(hexcode)) {
+        let truthIndex = arrayHex.indexOf(hexcode);
+        let truth = archiveUpdate[truthIndex];
+        truth.truthtext = truthtext;
+        const timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
+        truth.timestamp = timestamp;
+      } else {
+        console.log("error: ", "truth with hexcode not found");
+      }
+    } else {
+      console.log("error: ", "problem with truthtext or hexcode input");
+    }
+
+    this.setState({archiveCapture: archiveUpdate});
   }
 
   async componentDidMount() {
@@ -128,7 +162,7 @@ class TruthCapture extends React.Component {
       <div className="container">
         <div id="truthcapture">
           <div className="entry">
-            <Entry onClick={this.handleSubmit} />
+            <Entry onSubmit={this.handleSubmit} onUpdate={this.handleUpdate} />
           </div>
           <div className="display">
             <Display archiveDisplay={archiveArchive} />
