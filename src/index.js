@@ -17,8 +17,8 @@ export function Truth(props) {
 export function Display(props) {
   return(
     <div id="table">
-      <h1 id="list-title">List of Truths</h1>
-      <table id="truthtable">
+      <h1 id="list-title" className="list-title">Archive</h1>
+      <table id="truth-table" className="truth-table">
         <thead></thead>
         <tbody>
           <tr id="table-head-row">
@@ -59,7 +59,7 @@ class Entry extends React.Component {
 
   render() {
     return (
-      <form>
+      <form className="truth-form">
         <label htmlFor="truthtext">
           What is your truth?
           <input type="text" value={this.state.truthtext} onChange={this.handleChange} name="truthtext" />
@@ -73,6 +73,7 @@ class Entry extends React.Component {
 
         <input type="button" value="Testify" onClick={(e) => this.props.onSubmit(this.state.truthtext, this.state.hexcode)} />
         <input type="button" value="Update" onClick={(e) => this.props.onUpdate(this.state.truthtext, this.state.hexcode)} />
+        <input type="button" value="Delete" onClick={(e) => this.props.onDelete(this.state.hexcode)} />
 
       </form>
     );
@@ -94,6 +95,7 @@ class TruthCapture extends React.Component {
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleUpdate = this.handleUpdate.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
   }
 
   existence(hexcode) {
@@ -147,6 +149,26 @@ class TruthCapture extends React.Component {
     this.setState({archiveCapture: archiveUpdate});
   }
 
+  handleDelete(hexcode) {
+    let archiveDelete = this.state.archiveCapture.slice();
+    let arrayHex = archiveDelete.map(item => item.hexcode);
+
+    if (hexcode) {
+      if (this.existence(hexcode)) {
+        let truthIndex = arrayHex.indexOf(hexcode);
+        let truth = archiveDelete[truthIndex];
+        alert("are you sure you want to delete this truth: '" + truth.truthtext + "'?");
+        archiveDelete = archiveDelete.filter(item => item.hexcode !== hexcode);
+      } else {
+        console.log("error: ", "truth with hexcode not found");
+      }
+    } else {
+      console.log("error: ", "problem with hexcode input");
+    }
+
+    this.setState({archiveCapture: archiveDelete});
+  }
+
   async componentDidMount() {
     console.log("truth capture app loaded");
 
@@ -162,7 +184,11 @@ class TruthCapture extends React.Component {
       <div className="container">
         <div id="truthcapture">
           <div className="entry">
-            <Entry onSubmit={this.handleSubmit} onUpdate={this.handleUpdate} />
+            <Entry 
+              onSubmit={this.handleSubmit} 
+              onUpdate={this.handleUpdate} 
+              onDelete={this.handleDelete}
+            />
           </div>
           <div className="display">
             <Display archiveDisplay={archiveArchive} />
