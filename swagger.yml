@@ -39,12 +39,18 @@ paths:
             type: array # defines the structure of the schema as an array
             items: 
               properties: # defines the items in the array as objects having key/value pairs
+                id:
+                  type: string
+                  description: id of the truth
                 truthtext: # defines the first key of the object
                   type: string # defines the value associated with truthtext as a string
+                  description: text of the truth
                 hexcode: 
                   type: string
+                  description: hexcode of the truth
                 timestamp: 
                   type: string
+                  description: creation/update timestamp of the truth record
 
     post:
       operationId: truths.create
@@ -65,12 +71,26 @@ paths:
                 description: Text of truth to create
               hexcode:
                 type: string
-                description: Hex code (6 digit hexadecimal sequence) assigned to each truth, to associate each truth with a unique color and character sequence to identify it
+                description: Hex code (6 digit hexadecimal sequence) of truth to create
       responses:
         201:
           description: Successfully created truth in list
+          schema:
+            properties:
+              id:
+                type: string
+                description: id of the truth
+              truthtext:
+                type: string
+                description: text of the truth
+              hexcode:
+                type: string
+                description: hexcode of the truth
+              timestamp:
+                type: string
+                description: creation/update timestamp of the truth record
   
-  /truths/{hexcode}:
+  /truths/{id}:
     get:
       operationId: truths.read_one
       tags:
@@ -78,22 +98,29 @@ paths:
       summary: Read one truth from the truths list
       description: Read one truth from the truths list
       parameters:
-        - name: hexcode
+        - name: id
           in: path
-          description: Hexcode of the truth to get from the list
-          type: string
+          description: id of the truth to get from the list
+          type: integer
           required: True 
       responses:
         200:
           description: Successfully read truth from truths list operation
           schema:
+            type: object
             properties:
+              id:
+                type: string
+                description: id of the truth
               truthtext:
                 type: string
+                description: text of the truth
               hexcode:
                 type: string
+                description: hexcode of the truth
               timestamp:
                 type: string
+                description: creation/update timestamp of the truth record
     
     put:
       operationId: truths.update
@@ -102,10 +129,10 @@ paths:
       summary: Update a truth in the truths list
       description: Update a truth in the truths list
       parameters:
-        - name: hexcode
+        - name: id
           in: path
-          description: Hexcode of the truth to update in the truths list
-          type: string
+          description: id of the truth to update in the truths list
+          type: integer
           required: True 
         - name: truth
           in: body
@@ -114,11 +141,27 @@ paths:
             properties:
               truthtext:
                 type: string
+                description: text of the truth
               hexcode:
                 type: string
+                description: hexcode of the truth
       responses:
         200:
           description: Successfully updated truth in truths list
+          schema:
+            properties:
+              id:
+                type: string
+                description: id of the truth in the database
+              truthtext:
+                type: string
+                description: text of the truth
+              hexcode:
+                type: string
+                description: hexcode of the truth
+              timestamp:
+                type: string
+                description: creation/update timestamp of the truth record
       
     delete:
       operationId: truths.delete
@@ -127,9 +170,10 @@ paths:
       summary: Delete a truth from the truths list
       description: Delete a truth
       parameters:
-        - name: hexcode
+        - name: id
           in: path
-          type: string
+          type: integer
+          description: id of the truth to delete
           required: True 
       responses:
         200:

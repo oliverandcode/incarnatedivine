@@ -2,33 +2,16 @@
 # This is the truths module and supports all the ReST actions for the TRUTHS collection
 # """
 
-# System modules
-from datetime import datetime
-
 # 3rd party modules
-from flask import make_response, abort
-
-def get_timestamp():
-    return datetime.now().strftime(("%Y-%m-%d %H:%M:%S"))
-
-# Data to serve with our API
-TRUTHS = {
-    "FFFF00": {
-        "truthtext": "I like sunlight more than rain",
-        "hexcode": "FFFF00",
-        "timestamp": get_timestamp()
-    },
-    "000000": {
-        "truthtext": "Your silence will not protect you",
-        "hexcode": "000000",
-        "timestamp": get_timestamp()
-    },
-    "FFD1DC": {
-        "truthtext": "Gender is a myth",
-        "hexcode": "FFD1DC",
-        "timestamp": get_timestamp()
-    }
-}
+from flask import (
+    make_response, 
+    abort,
+)
+from config import db
+from models import (
+    Truth,
+    TruthSchema,
+)
 
 # Create a handler for our read_all (GET) truths
 def read_all():
@@ -38,29 +21,42 @@ def read_all():
 
     # :return:        json string of sorted list of truths
     # """
-
-    # Create the list of truths from our data
-    return [TRUTHS[key] for key in sorted(TRUTHS.keys())]
-
-def read_one(hexcode):
-    # """
-    # This function responds to a request for /api/truths/{hexcode}
-    # with one matching truth from truths
-    # :param hexcode:   hex code of truth to find
-    # :return:          truth matching hex code
-    # """
-
-    # Does the truth exist in truths?
-    if hexcode in TRUTHS:
-        truth = TRUTHS.get(hexcode)
     
-    # otherwise, nope, not found
+    # Create the list of truths from our data
+    truths = Truth.query.order_by(Truth.hexcode).all()
+    
+    # Serialize the data for the response
+    truth_schema = TruthSchema(many=True)
+    data = truth_schema.dump(truths)
+    return data
+
+
+def read_one(id):
+    # """
+    # This function responds to a request for /api/truths/{id}
+    # with one matching truth from truths
+    # :param id:   id of truth to find
+    # :return:          truth matching id
+    # """
+
+    # Get the truth requested
+    truth = Truth.query.filter(Truth.id == id).one_or_none()
+    
+    # Did we find a truth?
+    if truth is not None:
+
+        # Serialize the data for the response (implicit 'many=False')
+        truth_schema = TruthSchema()
+        data = truth_schema.dump(truth)
+        return data
+    
+    # Otherwise, nope, didn't find that person
     else:
         abort(
-            404, "Truth with hex code {hexcode} not found".format(hexcode=hexcode)
+            404,
+            "Truth not found for id: {id}".format(id=id),
         )
-    
-    return truth
+
 
 def create(truth):
     # """
@@ -71,66 +67,125 @@ def create(truth):
     # :return:        201 on success, 406 on truth exists
     # """
 
-    hexcode = truth.get("hexcode", None)
-    truthtext = truth.get("truthtext", None)
+    truthtext = truth.get("truthtext")
+    hexcode = truth.get("hexcode")
 
-    # Does the truth exist already?
-    if hexcode not in TRUTHS and hexcode is not None:
-        TRUTHS[hexcode] = {
-            "hexcode": hexcode,
-            "truthtext": truthtext,
-            "timestamp": get_timestamp(),
-        }
-        return make_response(
-            201, "{hexcode} successfully created".format(hexcode=hexcode),
-        )
+    existing_truth = (
+        Truth.query.filter(Truth.truthtext == truthtext)
+        .filter(Truth.hexcode == hexcode)
+        .one_or_none()
+    )
+    
+    # Can we insert this truth?
+    if existing_truth is None:
 
-    # Otherwise, it exists, that's an error
+        # Create a truth instance using the schema and the passed-in truth
+        schema = TruthSchema()
+        new_truth = schema.load(truth, session=db.session)
+
+        # Add the truth to the database
+        db.session.add(new_truth)
+        db.session.commit()
+
+        # Serialize and return the newly created truth in the response
+        data = schema.dump(new_truth)
+
+        return data, 201
+    
+    # Otherwise, nope, truth exists already
     else:
         abort(
-            406, "Truth with hex code {hexcode} already exists".format(hexcode=hexcode),
+            409,
+            "Truth {truthtext} with hexcode {hexcode} already exists".format(
+                truthtext=truthtext, hexcode=hexcode
+            )
         )
 
-def update(hexcode, truth):
+
+def update(id, truth):
     # """
     # This function updates an existing truth in the truths structure
 
-    # :param hexcode: hex code of truth to update in the truths structure
+    # :param id: id of the truth to update in the truths structure
     # :param truth:   truth to update
     # :return:        updated truths structure
     # """
 
-    # Does the truth exist in truths?
-    if hexcode in TRUTHS:
-        TRUTHS[hexcode]["truthtext"] = truth.get("truthtext")
-        TRUTHS[hexcode]["timestamp"] = get_timestamp()
+    # Get the truth requested from the db into session
+    update_truth = Truth.query.filter(
+        Truth.id == id
+    ).one_or_none()
 
-        return TRUTHS[hexcode]
+    # Try to find an existing truth with the same properties as the update
+    truthtext = truth.get("truthtext")
+    hexcode = truth.get("hexcode")
 
-    # otherwise, nope, that's an error
-    else:
+    existing_truth = (
+        Truth.query.filter(Truth.truthtext == truthtext)
+        .filter(Truth.hexcode == hexcode)
+        .one_or_none()
+    )
+
+    # Are we trying to find a truth that does not exist?
+    if update_truth is None:
         abort(
-            404, "Truth with hex code {hexcode} not found".format(hexcode=hexcode),
+            404,
+            "Truth not found for id: {id}".format(id=id),
         )
+    
+    # Would our update create a duplicate of another truth that already exists?
+    elif (
+        existing_truth is not None and existing_truth.id != id
+    ):
+        abort(
+            409,
+            "Truth {truthtext} with hexcode {hexcode} already exists".format(
+                truthtext=truthtext, hexcode=hexcode
+            ),
+        )
+    
+    # Otherwise go ahead and update!
+    else:
 
-def delete(hexcode):
+        # turn the passed in truth into a db object
+        schema = TruthSchema()
+        update = schema.load(truth, session=db.session)
+
+        # set the id to the truth we want to update
+        update.id = update_truth.id
+
+        # merge the new object into the old and commit it to the db
+        db.session.merge(update)
+        db.session.commit()
+
+        # return updated truth in the response
+        data = schema.dump(update_truth)
+
+        return data, 200
+
+
+def delete(id):
     # """
     # This function deletes a truth from the truths structure
 
-    # :param hexcode: hex code of truth to delete
+    # :param id: id of truth to delete
     # :return:        200 on successful deletion, 404 if not found
     # """
 
-    # Does the truth to delete exist?
-    if hexcode in TRUTHS:
-        del TRUTHS[hexcode]
-        
-        return make_response(
-            200, "{hexcode} successfully deleted".format(hexcode=hexcode),
-        )
+    # get the truth requested
+    truth = Truth.query.filter(Truth.id == id).one_or_none()
 
-    # Otherwise, nope, truth to delete not found
+    # did we find a truth?
+    if truth is not None:
+        db.session.delete(truth)
+        db.session.commit()
+        return make_response(
+            "Truth {id} deleted".format(id=id), 200,
+        )
+    
+    # Otherwise, nope, didn't find that truth
     else:
         abort(
-            404, "Truth with hex code {hexcode} not found".format(hexcode=hexcode)
+            404,
+            "Truth not found for id: {id}".format(id=id),
         )
