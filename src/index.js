@@ -172,9 +172,10 @@ class TruthCapture extends React.Component {
   async componentDidMount() {
     console.log("truth capture app loaded");
 
-    const remoteTruths = await axios.get("http://localhost:5000/api/truths");
-    console.log("[truthcapture/componentDidMount]: truths received:", remoteTruths.data);
-    this.setState({ archiveCapture: remoteTruths.data });
+    let remoteTruths = await axios.get("http://localhost:5000/api/truths");
+    remoteTruths = remoteTruths.data;
+    console.log("[truthcapture/componentDidMount]: truths received:", remoteTruths);
+    this.setState({ archiveCapture: remoteTruths });
   }
 
   render() {

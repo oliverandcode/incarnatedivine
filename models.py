@@ -1,6 +1,6 @@
 from datetime import datetime
 from config import db, ma
-from marshmallow_sqlalchemy import SQLAlchemySchema
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 
 class Truth(db.Model):
     __tablename__ = 'truth'
@@ -16,4 +16,5 @@ class Truth(db.Model):
 class TruthSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Truth
+        load_instance = True
         sqla_session = db.session
