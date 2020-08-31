@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Truth Acceptance</title>
+        <link rel="stylesheet" href="src/index.css" />
+        <script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="banner">Truth Acceptance App</h1>
+            <div class="editor">
+                <label for="truthtext">
+                    What is your truth?
+                    <input id="truthtext" type="text" />
+                </label>
+                <br />
+                <label for="hexcode">
+                    Pick a color (hex code format)
+                    <input id="hexcode" type="text" />
+                </label>
+                <br />
+                <button id="create">Create</button>
+                <button id="update">Update</button>
+                <button id="delete">Delete</button>
+                <button id="reset">Reset</button>
+            </div>
+            <br />
+            <div class="truths">
+                <table>
+                    <caption>Truths</caption>
+                    <thead>
+                        <tr>
+                            <th>Truth</th>
+                            <th>Hex Code</th>
+                            <th>Update Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- list of truths -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </body>
+    <script src="src/index.js"></script>
+    <!-- <script src="static/js/home.js"></script> -->
+</html>

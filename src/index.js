@@ -109,17 +109,29 @@ class TruthCapture extends React.Component {
     }
   }
 
-  handleSubmit(truthtext, hexcode) {
+  handleSubmit(truth, hex) {
     let archiveSubmit = this.state.archiveCapture.slice();
     
-    if (truthtext && hexcode) {
-      if (this.existence(hexcode)) {
+    if (truth && hex) {
+      if (this.existence(hex)) {
         console.log("error: ", "truth with hexcode already exists");
       } else {
         const timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
         archiveSubmit.push(
-          {hexcode: hexcode, timestamp: timestamp, truthtext: truthtext}
+          {hexcode: hex, timestamp: timestamp, truthtext: truth}
         );
+        axios.post('http://localhost:5000/api/truths', {
+          truthtext: truth,
+          hexcode: hex
+        })
+        .then(function (response) {
+          // handle success
+          console.log(response);
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        })
       }
     } else {
       console.log("error: ", "problem with truthtext or hexcode input");
@@ -139,6 +151,22 @@ class TruthCapture extends React.Component {
         truth.truthtext = truthtext;
         const timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
         truth.timestamp = timestamp;
+
+        let baseURL = 'http://localhost:5000/api/truths/';
+        let truthURL = baseURL + truth.id.toString();
+
+        axios.put(truthURL, {
+          truthtext: truthtext,
+          hexcode: hexcode
+        })
+        .then(function (response) {
+          // handle success
+          console.log(response);
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        })
       } else {
         console.log("error: ", "truth with hexcode not found");
       }
@@ -159,6 +187,20 @@ class TruthCapture extends React.Component {
         let truth = archiveDelete[truthIndex];
         alert("are you sure you want to delete this truth: '" + truth.truthtext + "'?");
         archiveDelete = archiveDelete.filter(item => item.hexcode !== hexcode);
+        console.log(truth.id);
+
+        let baseURL = 'http://localhost:5000/api/truths/';
+        let truthURL = baseURL + truth.id.toString();
+
+        axios.delete(truthURL)
+        .then(function (response) {
+          // handle success
+          console.log(response);
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        })
       } else {
         console.log("error: ", "truth with hexcode not found");
       }
