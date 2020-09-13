@@ -24,7 +24,7 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        'create': function(truthtext, hexcode) {
+        'create': function(truthtext, speaker) {
             let ajax_options = {
                 type: 'POST',
                 url: 'api/truths',
@@ -33,7 +33,7 @@ ns.model = (function() {
                 dataType: 'json',
                 data: JSON.stringify({
                     'truthtext': truthtext,
-                    'hexcode': hexcode,
+                    'speaker': speaker,
                 }),
             };
             $.ajax(ajax_options)
@@ -44,15 +44,15 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        'update': function(truthtext, hexcode) {
+        'update': function(truthtext, speaker) {
             let ajax_options = {
                 type: 'PUT',
-                url: 'api/truths/' + hexcode,
+                url: 'api/truths/' + speaker,
                 accepts: 'application/json',
                 dataType: 'json',
                 data: JSON.stringify({
                     'truthtext': truthtext,
-                    'hexcode': hexcode,
+                    'speaker': speaker,
                 }),
             };
             $.ajax(ajax_options)
@@ -63,10 +63,10 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        'delete': function(hexcode) {
+        'delete': function(speaker) {
             let ajax_options = {
                 type: 'DELETE',
-                url: 'api/truths/' + hexcode,
+                url: 'api/truths/' + speaker,
                 accepts: 'application/json',
                 contentType: 'plain/text',
             };
@@ -86,16 +86,16 @@ ns.view = (function() {
     'use strict';
 
     let $truthtext = $('#truthtext'),
-        $hexcode = $('#hexcode');
+        $speaker = $('#speaker');
     
     // return the API
     return {
         reset: function() {
-            $hexcode.val('');
+            $speaker.val('');
             $truthtext.val('').focus();
         },
-        update_editor: function(truthtext, hexcode) {
-            $hexcode.val(hexcode);
+        update_editor: function(truthtext, speaker) {
+            $speaker.val(speaker);
             $truthtext.val(truthtext).focus();
         },
         build_table: function(truths) {
@@ -107,7 +107,7 @@ ns.view = (function() {
             // did we get a truths array?
             if (truths) {
                 for (let i=0, l=truths.length; i < l; i++) {
-                    rows += `<tr><td class="truthtext">${truths[i].truthtext}</td><td class="hexcode">${truths[i].hexcode}</td><td>${truths[i].timestamp}</td></tr>`;
+                    rows += `<tr><td class="truthtext">${truths[i].truthtext}</td><td class="speaker">${truths[i].speaker}</td><td>${truths[i].timestamp}</td></tr>`;
                 }
                 $('table > tbody').append(rows);
             }
@@ -132,7 +132,7 @@ ns.controller = (function(m, v) {
         view = v,
         $event_pump = $('body'),
         $truthtext = $('#truthtext'),
-        $hexcode = $('#hexcode');
+        $speaker = $('#speaker');
     
     // Get the data from the model after the controller is done initializing
     setTimeout(function() {
@@ -140,47 +140,47 @@ ns.controller = (function(m, v) {
     }, 100)
 
     // Validate input
-    function validate(truthtext, hexcode) {
-        return truthtext !== "" && hexcode !== "";
+    function validate(truthtext, speaker) {
+        return truthtext !== "" && speaker !== "";
     }
 
     // Create our event handlers
     $('#create').click(function(e) {
         let truthtext = $truthtext.val(),
-            hexcode = $hexcode.val();
+            speaker = $speaker.val();
         
         e.preventDefault();
 
-        if (validate(truthtext, hexcode)) {
-            model.create(truthtext, hexcode);
+        if (validate(truthtext, speaker)) {
+            model.create(truthtext, speaker);
         } else {
-            alert('Problem with truth or hex code input');
+            alert('Problem with truth or speaker input');
         }
     });
 
     $('#update').click(function(e) {
         let truthtext = $truthtext.val(),
-            hexcode = $hexcode.val();
+            speaker = $speaker.val();
 
         e.preventDefault();
 
-        if (validate(truthtext, hexcode)) {
-            model.update(truthtext, hexcode);
+        if (validate(truthtext, speaker)) {
+            model.update(truthtext, speaker);
         } else {
-            alert('Problem with truth or hex code input');
+            alert('Problem with truth or speaker input');
         }
         e.preventDefault();
     });
 
     $('#delete').click(function(e) {
-        let hexcode = $hexcode.val();
+        let speaker = $speaker.val();
 
         e.preventDefault();
 
-        if (validate('placeholder', hexcode)) {
-            model.delete(hexcode);
+        if (validate('placeholder', speaker)) {
+            model.delete(speaker);
         } else {
-            alert('Problem with hex code input');
+            alert('Problem with speaker input');
         }
         e.preventDefault();
     });
@@ -192,19 +192,19 @@ ns.controller = (function(m, v) {
     $('table > tbody').on('dblclick', 'tr', function(e) {
         let $target = $(e.target),
             truthtext,
-            hexcode;
+            speaker;
         
         truthtext = $target
             .parent()
             .find('td.truthtext')
             .text();
         
-        hexcode = $target
+        speaker = $target
             .parent()
-            .find('td.hexcode')
+            .find('td.speaker')
             .text();
         
-        view.update_editor(truthtext, hexcode);
+        view.update_editor(truthtext, speaker);
     });
 
     // Handle the model events

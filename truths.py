@@ -23,7 +23,7 @@ def read_all():
     # """
     
     # Create the list of truths from our data
-    truths = Truth.query.order_by(Truth.hexcode).all()
+    truths = Truth.query.order_by(Truth.timestamp).all()
     
     # Serialize the data for the response
     truth_schema = TruthSchema(many=True)
@@ -35,8 +35,8 @@ def read_one(id):
     # """
     # This function responds to a request for /api/truths/{id}
     # with one matching truth from truths
-    # :param id:   id of truth to find
-    # :return:          truth matching id
+    # :param id:    id of truth to find
+    # :return:      truth matching id
     # """
 
     # Get the truth requested
@@ -68,11 +68,12 @@ def create(truth):
     # """
 
     truthtext = truth.get("truthtext")
-    hexcode = truth.get("hexcode")
+    speaker = truth.get("speaker")
 
+    # this finds any truth objects that have identical values for BOTH truthtext AND speaker
     existing_truth = (
         Truth.query.filter(Truth.truthtext == truthtext)
-        .filter(Truth.hexcode == hexcode)
+        .filter(Truth.speaker == speaker)
         .one_or_none()
     )
     
@@ -96,8 +97,8 @@ def create(truth):
     else:
         abort(
             409,
-            "Truth {truthtext} with hexcode {hexcode} already exists".format(
-                truthtext=truthtext, hexcode=hexcode
+            "Truth {truthtext} with speaker {speaker} already exists".format(
+                truthtext=truthtext, speaker=speaker
             )
         )
 
@@ -106,9 +107,9 @@ def update(id, truth):
     # """
     # This function updates an existing truth in the truths structure
 
-    # :param id: id of the truth to update in the truths structure
-    # :param truth:   truth to update
-    # :return:        updated truths structure
+    # :param id:        id of the truth to update in the truths structure
+    # :param truth:     truth to update
+    # :return:          updated truths structure
     # """
 
     # Get the truth requested from the db into session
@@ -118,11 +119,11 @@ def update(id, truth):
 
     # Try to find an existing truth with the same properties as the update
     truthtext = truth.get("truthtext")
-    hexcode = truth.get("hexcode")
+    speaker = truth.get("speaker")
 
     existing_truth = (
         Truth.query.filter(Truth.truthtext == truthtext)
-        .filter(Truth.hexcode == hexcode)
+        .filter(Truth.speaker == speaker)
         .one_or_none()
     )
 
@@ -139,8 +140,8 @@ def update(id, truth):
     ):
         abort(
             409,
-            "Truth {truthtext} with hexcode {hexcode} already exists".format(
-                truthtext=truthtext, hexcode=hexcode
+            "Truth {truthtext} with speaker {speaker} already exists".format(
+                truthtext=truthtext, speaker=speaker
             ),
         )
     
@@ -168,8 +169,8 @@ def delete(id):
     # """
     # This function deletes a truth from the truths structure
 
-    # :param id: id of truth to delete
-    # :return:        200 on successful deletion, 404 if not found
+    # :param id:    id of truth to delete
+    # :return:      200 on successful deletion, 404 if not found
     # """
 
     # get the truth requested

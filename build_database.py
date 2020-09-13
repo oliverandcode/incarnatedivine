@@ -6,19 +6,27 @@ from models import Truth
 TRUTHS = [
     {
         'truthtext': 'Your silence will not protect you', 
-        'hexcode': '000000'
+        'speaker': 'Audre Lorde'
     },
     {
         'truthtext': 'Gender is a myth', 
-        'hexcode': 'FFD1DC'
+        'speaker': 'Oliver Ayers'
     },
     {
         'truthtext': 'I like sunlight more than rain', 
-        'hexcode': 'FFF222'
+        'speaker': 'Anonymous'
     },
     {
         'truthtext': 'I cried at the temple at Burning Man', 
-        'hexcode': '6699CC'
+        'speaker': 'Anonymous'
+    },
+    {
+        'truthtext': 'Selfishness',
+        'speaker': 'Anonymous'
+    },
+    {
+        'truthtext': 'There is a war going on',
+        'speaker': 'Anonymous'
     }
 ]
 
@@ -33,7 +41,7 @@ db.create_all()
 for truth in TRUTHS:
     t = Truth(
         truthtext=truth["truthtext"], 
-        hexcode=truth["hexcode"]
+        speaker=truth["speaker"]
     )
     db.session.add(t)
 

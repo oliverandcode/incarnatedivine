@@ -45,9 +45,9 @@ paths:
                 truthtext: # defines the first key of the object
                   type: string # defines the value associated with truthtext as a string
                   description: text of the truth
-                hexcode: 
+                speaker: 
                   type: string
-                  description: hexcode of the truth
+                  description: speaker of the truth
                 timestamp: 
                   type: string
                   description: creation/update timestamp of the truth record
@@ -69,9 +69,9 @@ paths:
               truthtext:
                 type: string
                 description: Text of truth to create
-              hexcode:
+              speaker:
                 type: string
-                description: Hex code (6 digit hexadecimal sequence) of truth to create
+                description: Speaker of truth to create
       responses:
         201:
           description: Successfully created truth in list
@@ -83,9 +83,9 @@ paths:
               truthtext:
                 type: string
                 description: text of the truth
-              hexcode:
+              speaker:
                 type: string
-                description: hexcode of the truth
+                description: speaker of the truth
               timestamp:
                 type: string
                 description: creation/update timestamp of the truth record
@@ -115,9 +115,9 @@ paths:
               truthtext:
                 type: string
                 description: text of the truth
-              hexcode:
+              speaker:
                 type: string
-                description: hexcode of the truth
+                description: speaker of the truth
               timestamp:
                 type: string
                 description: creation/update timestamp of the truth record
@@ -142,9 +142,9 @@ paths:
               truthtext:
                 type: string
                 description: text of the truth
-              hexcode:
+              speaker:
                 type: string
-                description: hexcode of the truth
+                description: speaker of the truth
       responses:
         200:
           description: Successfully updated truth in truths list
@@ -156,9 +156,9 @@ paths:
               truthtext:
                 type: string
                 description: text of the truth
-              hexcode:
+              speaker:
                 type: string
-                description: hexcode of the truth
+                description: speaker of the truth
               timestamp:
                 type: string
                 description: creation/update timestamp of the truth record

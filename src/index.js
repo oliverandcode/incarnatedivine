@@ -9,7 +9,7 @@ export function Truth(props) {
     <tr>
       <td>{props.id}</td>
       <td>{props.truthtext}</td>
-      <td>{props.hexcode}</td>
+      <td>{props.speaker}</td>
       <td>{props.timestamp}</td>
     </tr>
   );
@@ -25,13 +25,13 @@ export function Display(props) {
           <tr id="table-head-row">
             <th>ID</th>
             <th>Truth</th>
-            <th>Hex</th>
+            <th>Speaker</th>
             <th>Time</th>
           </tr>
             {props.archiveDisplay.map(
               (truth) =>
               (<Truth key={truth.id}
-                hexcode={truth.hexcode} 
+                speaker={truth.speaker} 
                 id = {truth.id} 
                 truthtext={truth.truthtext} 
                 timestamp={truth.timestamp} />)
@@ -47,7 +47,7 @@ class Entry extends React.Component {
     super(props);
     this.state = {
       truthtext: '',
-      hexcode: '',
+      speaker: '',
       id: '',
     };
     this.handleChange = this.handleChange.bind(this);
@@ -56,8 +56,8 @@ class Entry extends React.Component {
   handleChange(event) {
     if (event.target.name === "truthtext") {
       this.setState({truthtext: event.target.value});
-    } else if (event.target.name === "hexcode") {
-      this.setState({hexcode: event.target.value});
+    } else if (event.target.name === "speaker") {
+      this.setState({speaker: event.target.value});
     } else if (event.target.name === "truth-id") {
       this.setState({id: event.target.value});
     }
@@ -67,13 +67,13 @@ class Entry extends React.Component {
     return (
       <form className="truth-form">
         <label htmlFor="truthtext">
-          What is your truth?
+          What is your truth? 
           <input type="text" value={this.state.truthtext} onChange={this.handleChange} name="truthtext" />
         </label>
         <br />
-        <label htmlFor="hexcode">
-          Pick a color:
-          <input type="text" value={this.state.hexcode} onChange={this.handleChange} name="hexcode" />
+        <label htmlFor="speaker">
+          Who is the truth speaker?
+          <input type="text" value={this.state.speaker} onChange={this.handleChange} name="speaker" />
         </label>
         <br />
         <label htmlFor="truth-id">
@@ -92,8 +92,8 @@ class Entry extends React.Component {
         </select> 
         */}
 
-        <input type="button" value="Testify" onClick={(e) => this.props.onSubmit(this.state.truthtext, this.state.hexcode)} />
-        <input type="button" value="Update" onClick={(e) => this.props.onUpdate(this.state.truthtext, this.state.hexcode, this.state.id)} />
+        <input type="button" value="Testify" onClick={(e) => this.props.onSubmit(this.state.truthtext, this.state.speaker)} />
+        <input type="button" value="Update" onClick={(e) => this.props.onUpdate(this.state.truthtext, this.state.speaker, this.state.id)} />
         <input type="button" value="Delete" onClick={(e) => this.props.onDelete(this.state.id)} />
 
       </form>
@@ -106,12 +106,12 @@ class TruthCapture extends React.Component {
     super(props);
     this.state = {
       archiveCapture: [
-        {id: 1, hexcode: "yellow", timestamp: "2020-05-28 10:00:00", truthtext: "I like sunlight more than rain"},
-        // {id: 2, hexcode: "greyblue", timestamp: "2020-05-28 10:00:00", truthtext: "I cried at the temple at Burning Man"},
-        // {id: 3, hexcode: "000000", timestamp: "2020-05-28 10:00:00", truthtext: "Your silence will not protect you"},
-        // {id: 4, hexcode: "green", timestamp: "2020-05-28 10:00:00", truthtext: "Selfishness"},
-        // {id: 5, hexcode: "red", timestamp: "2020-05-28 10:00:00", truthtext: "There is a war going on"},
-        // {id: 6, hexcode: "millennialpink", timestamp: "2020-05-28 10:00:00", truthtext: "Gender is a myth"},
+        {id: 1, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "I like sunlight more than rain"},
+        // {id: 2, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "I cried at the temple at Burning Man"},
+        // {id: 3, speaker: "Audre Lorde", timestamp: "2020-05-28 10:00:00", truthtext: "Your silence will not protect you"},
+        // {id: 4, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "Selfishness"},
+        // {id: 5, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "There is a war going on"},
+        // {id: 6, speaker: "Oliver Ayers", timestamp: "2020-05-28 10:00:00", truthtext: "Gender is a myth"},
       ],
     };
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -130,20 +130,42 @@ class TruthCapture extends React.Component {
     }
   }
 
-  handleSubmit(truth, hex) {
+  duplicateExists(truthtext, speaker) {
+    let archiveDuplicate = this.state.archiveCapture.slice();
+    let textArray = archiveDuplicate.map(truth => truth.truthtext);
+    let speakerArray = archiveDuplicate.map(truth => truth.speaker);
+    let textIndex = textArray.indexOf(truthtext);
+    let speakerIndex = speakerArray.indexOf(speaker);
+    // if both truthtext and speaker have existing matches...
+    if (textArray[textIndex] && speakerArray[speakerIndex]) {
+      // ...check to see if their index values match
+      if (textIndex === speakerIndex) {
+        // if their index values match, they belong to the same truth object, which means there IS a duplicate
+        return true;
+      } else {
+        // otherwise (if the index values do not match) there's no duplicate
+        return false;
+      }
+    } else {
+      // if either truthtext or speaker doesn't have a match, it's fine, there's no duplicate
+      return false;
+    }
+  }
+
+  handleSubmit(truthtext, speaker) {
     let archiveSubmit = this.state.archiveCapture.slice();
     
-    if (truth && hex) {
-      if (this.existence(hex)) {
-        console.log("error: ", "truth with hexcode already exists");
+    if (truthtext && speaker) {
+      if (this.duplicateExists(truthtext, speaker)) {
+        console.log("error: truthtext with speaker already exists");
       } else {
         const timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
         archiveSubmit.push(
-          {hexcode: hex, timestamp: timestamp, truthtext: truth}
+          {speaker: speaker, timestamp: timestamp, truthtext: truthtext}
         );
         axios.post('http://localhost:5000/api/truths', {
-          truthtext: truth,
-          hexcode: hex
+          truthtext: truthtext,
+          speaker: speaker
         })
         .then(function (response) {
           // handle success
@@ -155,13 +177,13 @@ class TruthCapture extends React.Component {
         })
       }
     } else {
-      console.log("error: ", "problem with truthtext or hexcode input");
+      console.log("error: ", "problem with truthtext or speaker input");
     }
 
     this.setState({archiveCapture: archiveSubmit});
   }
 
-  handleUpdate(truthtext, hexcode, inputID) {
+  handleUpdate(truthtext, speaker, inputID) {
     let archiveUpdate = this.state.archiveCapture.slice();
     let arrayID = archiveUpdate.map(truthObject => truthObject.id);
 
@@ -179,33 +201,33 @@ class TruthCapture extends React.Component {
       var alertString = "alert string default text";
 
       if (this.existence(inputID)) {
-        let currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current hexcode: " + thisTruth.hexcode + "\n id: " + thisTruth.id;
+        let currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
 
         console.log("updating this truth: \n \n", currentTruthStatusString);
 
-        if (truthtext && hexcode) {
-          // are both truthtext and hexcode identical to current values? if so, prompt user to change one or both of them. if either of them are different from current values, update that value
+        if (truthtext && speaker) {
+          // are both truthtext and speaker identical to current values? if so, prompt user to change one or both of them. if either of them are different from current values, update that value
 
           if (truthtext !== thisTruth.truthtext) {
             // truthtext is new
-            // check hexcode for difference then update one or both values 
-            if (hexcode !== thisTruth.hexcode) {
-              // truthtext is new, and so is hexcode
-              // update BOTH truthtext AND hexcode
+            // check speaker for difference then update one or both values 
+            if (speaker !== thisTruth.speaker) {
+              // truthtext is new, and so is speaker
+              // update BOTH truthtext AND speaker
               // update timestamp
 
               thisTruth.truthtext = truthtext;
-              thisTruth.hexcode = hexcode;
+              thisTruth.speaker = speaker;
               thisTruth.timestamp = updateTimestamp;
 
-              currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current hexcode: " + thisTruth.hexcode + "\n id: " + thisTruth.id;
+              currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
               console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
               alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
               alert(alertString);
 
               axios.put(truthURL, {
                 truthtext: truthtext,
-                hexcode: hexcode,
+                speaker: speaker,
                 timestamp: updateTimestamp
               })
               .then(function (response) {
@@ -217,14 +239,14 @@ class TruthCapture extends React.Component {
                 console.log(error);
               })
             } else {
-              // truthtext is new, but hexcode is NOT
-              // update truthtext but NOT hexcode (because it's the same) - is this an unnecessary extra step? as long as one of the values is different I have to update the truth object, and I can just set it to the desired values even if one of them doesn't change anything - the timestamp will still change, and it should still update correctly.
+              // truthtext is new, but speaker is NOT
+              // update truthtext but NOT speaker (because it's the same) - is this an unnecessary extra step? as long as one of the values is different I have to update the truth object, and I can just set it to the desired values even if one of them doesn't change anything - the timestamp will still change, and it should still update correctly.
               // update timestamp
 
               thisTruth.truthtext = truthtext;
               thisTruth.timestamp = updateTimestamp;
 
-              currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current hexcode: " + thisTruth.hexcode + "\n id: " + thisTruth.id;
+              currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
               console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
               alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
               alert(alertString);
@@ -242,20 +264,20 @@ class TruthCapture extends React.Component {
                 console.log(error);
               })
             }
-          } else if (hexcode !== thisTruth.hexcode) {
-            // truthtext is entered, unchanged, but hexcode is new
-            // update hexcode but NOT truthtext
+          } else if (speaker !== thisTruth.speaker) {
+            // truthtext is entered, unchanged, but speaker is new
+            // update speaker but NOT truthtext
             // update timestamp
-            thisTruth.hexcode = hexcode;
+            thisTruth.speaker = speaker;
             thisTruth.timestamp = updateTimestamp;
 
-            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current hexcode: " + thisTruth.hexcode + "\n id: " + thisTruth.id;
+            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
             console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
             alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
             alert(alertString);
 
             axios.put(truthURL, {
-              hexcode: hexcode,
+              speaker: speaker,
               timestamp: updateTimestamp
             })
             .then(function (response) {
@@ -267,20 +289,20 @@ class TruthCapture extends React.Component {
               console.log(error);
             })
           } else {
-            // valid id was input, truthtext entered but identical to current value, hexcode entered but identical to current value. no update, prompt user to change one or both values.
-            console.log("truthtext and hexcode both identical to current values. no update needed.");
-            alertString = "No change detected. Enter new truthtext or hexcode for this truth? \n \n" + currentTruthStatusString;
+            // valid id was input, truthtext entered but identical to current value, speaker entered but identical to current value. no update, prompt user to change one or both values.
+            console.log("truthtext and speaker both identical to current values. no update needed.");
+            alertString = "No change detected. Enter new truthtext or speaker for this truth? \n \n" + currentTruthStatusString;
             alert(alertString);
           }
         } else if (truthtext) {
-          // if truthtext is entered but hexcode is blank, check if truthtext is identical to current value. if not, update truthtext (do NOT update hexcode!). if it's identical, prompt user to change it.
+          // if truthtext is entered but speaker is blank, check if truthtext is identical to current value. if not, update truthtext (do NOT update speaker!). if it's identical, prompt user to change it.
           if (truthtext !== thisTruth.truthtext) {
-            // update truthtext. do NOT change the hexcode!
+            // update truthtext. do NOT change the speaker!
             // update timestamp
             thisTruth.truthtext = truthtext;
             thisTruth.timestamp = updateTimestamp;
 
-            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current hexcode: " + thisTruth.hexcode + "\n id: " + thisTruth.id;
+            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
             console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
             alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
             alert(alertString);
@@ -298,26 +320,26 @@ class TruthCapture extends React.Component {
               console.log(error);
             })
           } else {
-            // valid id was input, truthtext entered, hexcode blank, truthtext identical to current value. no update, prompt user to change truthtext.
-            console.log("truthtext entered but identical to current value. hexcode field is blank.");
+            // valid id was input, truthtext entered, speaker blank, truthtext identical to current value. no update, prompt user to change truthtext.
+            console.log("truthtext entered but identical to current value. speaker field is blank.");
             alertString = "No change detected. Enter new truthtext for this truth? \n \n" + currentTruthStatusString;
             alert(alertString);
           }
-        } else if (hexcode) {
-          // if hexcode is entered but truthtext is blank, check if hexcode is identical to current value. if not, update hexcode (do NOT update truthtext!). if it's identical, prompt user to change it.
-          if (hexcode !== thisTruth.hexcode) {
-            // update hexcode. do NOT change the truthtext!
+        } else if (speaker) {
+          // if speaker is entered but truthtext is blank, check if speaker is identical to current value. if not, update speaker (do NOT update truthtext!). if it's identical, prompt user to change it.
+          if (speaker !== thisTruth.speaker) {
+            // update speaker. do NOT change the truthtext!
             // update timestamp
-            thisTruth.hexcode = hexcode;
+            thisTruth.speaker = speaker;
             thisTruth.timestamp = updateTimestamp;
 
-            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current hexcode: " + thisTruth.hexcode + "\n id: " + thisTruth.id;
+            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
             console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
             alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
             alert(alertString);
             
             axios.put(truthURL, {
-              hexcode: hexcode,
+              speaker: speaker,
               timestamp: updateTimestamp
             })
             .then(function (response) {
@@ -329,15 +351,15 @@ class TruthCapture extends React.Component {
               console.log(error);
             })
           } else {
-            // valid id was input, hexcode entered, truthtext blank, hexcode identical to current value. no update, prompt user to change hexcode.
-            console.log("hexcode entered but identical to current value. truthtext field is blank.");
-            alertString = "No change detected. Enter new hexcode for this truth? \n \n" + currentTruthStatusString;
+            // valid id was input, speaker entered, truthtext blank, speaker identical to current value. no update, prompt user to change speaker.
+            console.log("speaker entered but identical to current value. truthtext field is blank.");
+            alertString = "No change detected. Enter new speaker for this truth? \n \n" + currentTruthStatusString;
             alert(alertString);
           }
         } else {
-          // id was input, matches existing truth id, but both hexcode and truthtext fields are blank. no update, prompt user for hexcode or truthtext input.
-          console.log("hexcode and truthtext fields left blank");
-          alertString = "No truthtext or hexcode input detected. Enter new truthtext or hexcode for this truth? \n \n" + currentTruthStatusString;
+          // id was input, matches existing truth id, but both speaker and truthtext fields are blank. no update, prompt user for speaker or truthtext input.
+          console.log("speaker and truthtext fields left blank");
+          alertString = "No truthtext or speaker input detected. Enter new truthtext or speaker for this truth? \n \n" + currentTruthStatusString;
           alert(alertString);
         }
 
@@ -353,7 +375,6 @@ class TruthCapture extends React.Component {
       alertString = "Please enter an ID for a truth to be updated.";
       alert(alertString);
     }
-
 
     this.setState({archiveCapture: archiveUpdate});
   }
