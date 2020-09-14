@@ -186,4 +186,4 @@ dmypy.json
 cython_debug/
 
 # database
-truths.db
+*.db
