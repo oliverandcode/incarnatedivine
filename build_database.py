@@ -34,6 +34,14 @@ from models import Speaker, Truth
 # Data to initialize the database with
 SPEAKERS = [
     {
+        "name": "Anonymous",
+        "truths": [
+            ("I like sunlight more than rain", "2014-09-14 12:00:00"),
+            ("Selfishness", "2018-09-14 12:00:00"),
+            ("I cried at the temple at Burning Man", "2019-09-14 12:00:00"),
+        ],
+    },
+    {
         "name": "Audre Lorde",
         "truths": [
             ("Your silence will not protect you.", "1977-12-28 00:00:00"),
@@ -50,14 +58,6 @@ SPEAKERS = [
         "truths": [
             ("There is a war going on", "1990-01-02 00:00:00"),
             ("Your silence will not protect you", "1990-01-02 01:01:01"),
-        ],
-    },
-    {
-        "name": "Anonymous",
-        "truths": [
-            ("I like sunlight more than rain", "2014-09-14 12:00:00"),
-            ("Selfishness", "2018-09-14 12:00:00"),
-            ("I cried at the temple at Burning Man", "2019-09-14 12:00:00"),
         ],
     },
 ]

@@ -13,168 +13,520 @@ produces:
 basePath: "/api" 
 
 paths: 
-  /truths: 
-    get: 
-      operationId: truths.read_all # "truths.read_all" defines the Python import path/function that will respond to an HTTP GET /api/truths request. The "truths.read_all" portion can go as deep as you need to in order to connect a function to the HTTP request. Something like "<package_name>.<package_name>.<package_name>.<function_name>" would work just as well. 
-      tags: 
-        - Truths
-      summary: Read the entire list of truths
-      description: Read the entire list of truths
-      parameters:
-        - name: length
-          in: query
-          type: integer
-          description: Number of truths to get from truths
-          required: False
-        - name: offset
-          in: query
-          type: integer
-          description: Offset from beginning of list where to start gathering truths
-          required: False
-      # This section defines the section of the configuration of a successful response from the URL endpoint:
-      responses: # defines the beginning of the expected response section
-        200: # defines the section for a successful response, HTTP status code 200
-          description: Successfully read entire truths list operation # defines the UI interface display text for a response of 200
-          schema: # defines the response as a schema, or structure
-            type: array # defines the structure of the schema as an array
-            items: 
-              properties: # defines the items in the array as objects having key/value pairs
-                id:
-                  type: string
-                  description: id of the truth
-                truthtext: # defines the first key of the object
-                  type: string # defines the value associated with truthtext as a string
-                  description: text of the truth
-                speaker: 
-                  type: string
-                  description: speaker of the truth
-                timestamp: 
-                  type: string
-                  description: creation/update timestamp of the truth record
 
+  /speakers:
+    get:
+      operationId: speakers.read_all
+      tags:
+        - Speakers
+      summary: Read the entire collection of speakers, sorted by name
+      responses:
+        200:
+          description: Successfully read speakers set operation
+          schema:
+            type: array
+            items:
+              properties:
+                speaker_id:
+                  type: integer
+                  description: id of the speaker
+                name:
+                  type: string
+                  description: name of the speaker
+                timestamp:
+                  type: string
+                  description: create/update timestamp of the speaker
+                truths:
+                  type: array
+                  items:
+                    properties:
+                      speaker_id:
+                        type: integer
+                        description: id of the speaker this truth is associated with
+                      truth_id:
+                        type: integer
+                        description: id of this truth
+                      content:
+                        type: string
+                        description: content of the truth
+                      timestamp:
+                        type: string
+                        description: create/update timestamp of this truth
+    
+    post:
+      operationId: speakers.create
+      tags:
+        - Speakers
+      summary: Create a new speaker
+      description: Create a new speaker
+      parameters:
+        - name: speaker
+          in: body
+          description: new speaker to create
+          required: True
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: name of new speaker to create
+      responses:
+        201:
+          description: Successfully created new speaker
+          schema:
+            properties:
+              speaker_id:
+                type: integer
+                description: id of the speaker
+              name:
+                type: string
+                description: name of the speaker
+              timestamp:
+                type: string
+                description: create/update timestamp of the speaker record
+  
+  /speakers/{speaker_id}:
+    get:
+      operationId: speakers.read_one
+      tags:
+        - Speakers
+      summary: Read one speaker
+      description: Read one specific speaker, indicated by speaker_id
+      parameters:
+        - name: speaker_id
+          in: path
+          description: id of the speaker to get
+          type: integer
+          required: True
+      responses:
+        200:
+          description: Successfully read one speaker from speakers data operation
+          schema:
+            type: object
+            properties:
+              speaker_id:
+                type: integer
+                description: id of the speaker
+              name:
+                type: string
+                description: name of the speaker
+              timestamp:
+                type: string
+                description: create/update timestamp of the speaker record
+              truths:
+                type: array
+                items:
+                  properties:
+                    speaker_id:
+                      type: integer
+                      description: id of the speaker this truth is associated with
+                    truth_id:
+                      type: integer
+                      description: id of this truth
+                    content:
+                      type: string
+                      description: content of this truth
+                    timestamp:
+                      type: string
+                      description: create/update timestamp of this truth
+
+    put:
+      operationId: speakers.update
+      tags:
+        - Speakers
+      summary: Update a speaker
+      description: Update a specific speaker, indicated by speaker_id
+      parameters:
+        - name: speaker_id
+          in: path
+          description: id of the speaker to update
+          type: integer
+          required: True
+        - name: speaker
+          in: body
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: name of the speaker to update
+      responses:
+        200:
+          description: Successfully updated speaker
+          schema:
+            properties:
+              speaker_id:
+                type: integer
+                description: id of the speaker in the database
+              name:
+                type: string
+                description: name of the speaker in the database
+              timestamp:
+                type: string
+                description: create/update timestamp of the speaker record
+
+    delete:
+      operationId: speakers.delete
+      tags:
+        - Speakers
+      summary: Delete a speaker
+      description: Delete a specific speaker from the collection of speakers, indicated by speaker_id
+      parameters:
+        - name: speaker_id
+          in: path
+          type: integer
+          description: id of the speaker to delete
+          required: True
+      responses:
+        200:
+          description: Successfully deleted this speaker
+
+  /truths:
+    get:
+      operationId: truths.read_all
+      tags:
+        - Truths
+      summary: Read the entire archive of truths for all speakers
+      description: Read the entire archive of truths for all speakers, sorted by timestamp
+      responses:
+        200:
+          description: Successfully read truths for all speakers operation
+          schema:
+            type: array
+            items:
+              properties:
+                truth_id:
+                  type: integer
+                  description: id of the truth
+                content:
+                  type: string
+                  description: content of the truth
+                timestamp:
+                  type: string
+                  description: create/update timestamp of the truth
+                speaker:
+                  type: object
+                  properties:
+                    speaker_id:
+                      type: integer
+                      description: id of the associated speaker
+                    name:
+                      type: string
+                      description: name of the associated speaker
+                    timestamp:
+                      type: string
+                      description: create/update timestamp of the associated speaker
+
+  /speakers/{speaker_id}/truths:
     post:
       operationId: truths.create
       tags:
         - Truths
-      summary: Create a truth and add it to the truth list
-      description: Create a truth in the truths list
+      summary: Create a new truth associated with a specific speaker
+      description: Create a new truth associated with a specific speaker, indicated by speaker_id
       parameters:
+        - name: speaker_id
+          in: path
+          description: id of the speaker associated with this truth
+          type: integer
+          required: True
         - name: truth
           in: body
-          description: Truth to create
-          required: True 
+          description: text content of the truth to create
+          required: True
           schema:
             type: object
             properties:
-              truthtext:
+              content:
                 type: string
-                description: Text of truth to create
-              speaker:
-                type: string
-                description: Speaker of truth to create
+                description: text content of the truth to create
       responses:
         201:
-          description: Successfully created truth in list
+          description: Successfully created a new truth
           schema:
             properties:
-              id:
+              speaker_id:
+                type: integer
+                description: id of the speaker associated with the new truth
+              truth_id:
+                type: integer
+                description: id of the newly created truth
+              content:
                 type: string
-                description: id of the truth
-              truthtext:
-                type: string
-                description: text of the truth
-              speaker:
-                type: string
-                description: speaker of the truth
+                description: text content of the new truth
               timestamp:
                 type: string
-                description: creation/update timestamp of the truth record
-  
-  /truths/{id}:
+                description: create/update timestamp of the truth record
+
+  /speakers/{speaker_id}/truths/{truth_id}:
     get:
       operationId: truths.read_one
       tags:
         - Truths
-      summary: Read one truth from the truths list
-      description: Read one truth from the truths list
+      summary: Read a specific truth associated with a specific speaker
+      description: Read a specific truth (indicated by truth_id) associated with a specific speaker (indicated by speaker_id)
       parameters:
-        - name: id
+        - name: speaker_id
           in: path
-          description: id of the truth to get from the list
+          description: id of the speaker associated with this truth
           type: integer
-          required: True 
+          required: True
+        - name: truth_id
+          in: path
+          description: id of this truth
+          type: integer
+          required: True
       responses:
         200:
-          description: Successfully read truth from truths list operation
+          description: Successfully read this truth for this speaker
           schema:
             type: object
             properties:
-              id:
+              truth_id:
+                type: integer
+                description: id of this truth
+              speaker_id:
+                type: integer
+                description: id of the speaker associated with this truth
+              content:
                 type: string
-                description: id of the truth
-              truthtext:
-                type: string
-                description: text of the truth
-              speaker:
-                type: string
-                description: speaker of the truth
+                description: text content of this truth
               timestamp:
                 type: string
-                description: creation/update timestamp of the truth record
-    
+                description: create/update timestamp of this truth record
+
     put:
       operationId: truths.update
       tags:
         - Truths
-      summary: Update a truth in the truths list
-      description: Update a truth in the truths list
+      summary: Update a specific truth associated with a specific speaker
+      description: Update a specific truth (indicated by truth_id) associated with a specific speaker (indicated by speaker_id)
       parameters:
-        - name: id
+        - name: speaker_id
           in: path
-          description: id of the truth to update in the truths list
+          description: id of the speaker who is associated with the truth being updated
           type: integer
-          required: True 
+          required: True
+        - name: truth_id
+          in: path
+          description: id of the truth being updated
+          type: integer
+          required: True
         - name: truth
           in: body
           schema:
             type: object
             properties:
-              truthtext:
+              content:
                 type: string
-                description: text of the truth
-              speaker:
-                type: string
-                description: speaker of the truth
+                description: text content of the truth being updated
       responses:
         200:
-          description: Successfully updated truth in truths list
+          description: Successfully updated this truth
           schema:
             properties:
-              id:
+              truth_id:
+                type: integer
+                description: id of the truth being updated
+              speaker_id:
+                type: integer
+                description: id of the speaker associated with this truth
+              content:
                 type: string
-                description: id of the truth in the database
-              truthtext:
-                type: string
-                description: text of the truth
-              speaker:
-                type: string
-                description: speaker of the truth
+                description: text content of the truth being updated
               timestamp:
                 type: string
-                description: creation/update timestamp of the truth record
-      
+                description: create/update timestamp of the truth record
+    
     delete:
       operationId: truths.delete
       tags:
         - Truths
-      summary: Delete a truth from the truths list
-      description: Delete a truth
+      summary: Delete a specific truth associated with a specific speaker
+      description: Delete a specific truth (indicated by truth_id) associated with a specific speaker (indicated by speaker_id)
       parameters:
-        - name: id
+        - name: speaker_id
           in: path
+          description: id of the speaker associated with the truth being deleted
           type: integer
+          required: True
+        - name: truth_id
+          in: path
           description: id of the truth to delete
-          required: True 
+          type: integer
+          required: True
       responses:
         200:
-          description: Successfully deleted a truth from truths list
+          description: Successfully deleted this truth
+
+
+  
+  ############
+  # old config
+  ############
+
+  # /truths: 
+  #   get: 
+  #     operationId: truths.read_all # "truths.read_all" defines the Python import path/function that will respond to an HTTP GET /api/truths request. The "truths.read_all" portion can go as deep as you need to in order to connect a function to the HTTP request. Something like "<package_name>.<package_name>.<package_name>.<function_name>" would work just as well. 
+  #     tags: 
+  #       - Truths
+  #     summary: Read the entire list of truths
+  #     description: Read the entire list of truths
+  #     parameters:
+  #       - name: length
+  #         in: query
+  #         type: integer
+  #         description: Number of truths to get from truths
+  #         required: False
+  #       - name: offset
+  #         in: query
+  #         type: integer
+  #         description: Offset from beginning of list where to start gathering truths
+  #         required: False
+  #     # This section defines the section of the configuration of a successful response from the URL endpoint:
+  #     responses: # defines the beginning of the expected response section
+  #       200: # defines the section for a successful response, HTTP status code 200
+  #         description: Successfully read entire truths list operation # defines the UI interface display text for a response of 200
+  #         schema: # defines the response as a schema, or structure
+  #           type: array # defines the structure of the schema as an array
+  #           items: 
+  #             properties: # defines the items in the array as objects having key/value pairs
+  #               id:
+  #                 type: string
+  #                 description: id of the truth
+  #               truthtext: # defines the first key of the object
+  #                 type: string # defines the value associated with truthtext as a string
+  #                 description: text of the truth
+  #               speaker: 
+  #                 type: string
+  #                 description: speaker of the truth
+  #               timestamp: 
+  #                 type: string
+  #                 description: creation/update timestamp of the truth record
+
+  #   post:
+  #     operationId: truths.create
+  #     tags:
+  #       - Truths
+  #     summary: Create a truth and add it to the truth list
+  #     description: Create a truth in the truths list
+  #     parameters:
+  #       - name: truth
+  #         in: body
+  #         description: Truth to create
+  #         required: True 
+  #         schema:
+  #           type: object
+  #           properties:
+  #             truthtext:
+  #               type: string
+  #               description: Text of truth to create
+  #             speaker:
+  #               type: string
+  #               description: Speaker of truth to create
+  #     responses:
+  #       201:
+  #         description: Successfully created truth in list
+  #         schema:
+  #           properties:
+  #             id:
+  #               type: string
+  #               description: id of the truth
+  #             truthtext:
+  #               type: string
+  #               description: text of the truth
+  #             speaker:
+  #               type: string
+  #               description: speaker of the truth
+  #             timestamp:
+  #               type: string
+  #               description: creation/update timestamp of the truth record
+  
+  # /truths/{id}:
+  #   get:
+  #     operationId: truths.read_one
+  #     tags:
+  #       - Truths
+  #     summary: Read one truth from the truths list
+  #     description: Read one truth from the truths list
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: id of the truth to get from the list
+  #         type: integer
+  #         required: True 
+  #     responses:
+  #       200:
+  #         description: Successfully read truth from truths list operation
+  #         schema:
+  #           type: object
+  #           properties:
+  #             id:
+  #               type: string
+  #               description: id of the truth
+  #             truthtext:
+  #               type: string
+  #               description: text of the truth
+  #             speaker:
+  #               type: string
+  #               description: speaker of the truth
+  #             timestamp:
+  #               type: string
+  #               description: creation/update timestamp of the truth record
+    
+  #   put:
+  #     operationId: truths.update
+  #     tags:
+  #       - Truths
+  #     summary: Update a truth in the truths list
+  #     description: Update a truth in the truths list
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         description: id of the truth to update in the truths list
+  #         type: integer
+  #         required: True 
+  #       - name: truth
+  #         in: body
+  #         schema:
+  #           type: object
+  #           properties:
+  #             truthtext:
+  #               type: string
+  #               description: text of the truth
+  #             speaker:
+  #               type: string
+  #               description: speaker of the truth
+  #     responses:
+  #       200:
+  #         description: Successfully updated truth in truths list
+  #         schema:
+  #           properties:
+  #             id:
+  #               type: string
+  #               description: id of the truth in the database
+  #             truthtext:
+  #               type: string
+  #               description: text of the truth
+  #             speaker:
+  #               type: string
+  #               description: speaker of the truth
+  #             timestamp:
+  #               type: string
+  #               description: creation/update timestamp of the truth record
+      
+  #   delete:
+  #     operationId: truths.delete
+  #     tags:
+  #       - Truths
+  #     summary: Delete a truth from the truths list
+  #     description: Delete a truth
+  #     parameters:
+  #       - name: id
+  #         in: path
+  #         type: integer
+  #         description: id of the truth to delete
+  #         required: True 
+  #     responses:
+  #       200:
+  #         description: Successfully deleted a truth from truths list
