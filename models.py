@@ -1,6 +1,8 @@
 from datetime import datetime
 from config import db, ma
+from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+from marshmallow_sqlalchemy.fields import Nested
 
 class Speaker(db.Model):
     __tablename__ = "speaker"
@@ -49,3 +51,27 @@ class SpeakerSchema(ma.SQLAlchemyAutoSchema):
         model = Speaker
         load_instance = True
         sqla_session = db.session
+    truths = fields.Nested('SpeakerTruthSchema', default=[], many=True)
+
+class SpeakerTruthSchema(ma.SQLAlchemyAutoSchema):
+    # """
+    # This class exists to get around a recursion issue
+    # """
+    truth_id = fields.Int()
+    speaker_id = fields.Int()
+    content = fields.Str()
+    timestamp = fields.Str()
+
+class TruthSchema(ma.SQLAlchemyAutoSchema):
+    class Meta:
+        model = Truth
+        sqla_session = db.session
+    speaker = fields.Nested('TruthSpeakerSchema', default=None)
+
+class TruthSpeakerSchema(ma.SQLAlchemyAutoSchema):
+    # """
+    # This class exists to get around a recursion issue
+    # """
+    speaker_id = fields.Int()
+    name = fields.Str()
+    timestamp = fields.Str()
