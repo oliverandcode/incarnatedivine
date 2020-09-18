@@ -25,7 +25,7 @@ def read_all():
     # """
     
     # Create the list of speakers from our data
-    speakers = SpeakerSchema.query.order_by(Speaker.name).all()
+    speakers = Speaker.query.order_by(Speaker.name).all()
     
     # Serialize the data for the response
     speaker_schema = SpeakerSchema(many=True)
