@@ -196,14 +196,14 @@ def delete(speaker_id):
     # did we find a speaker?
     if speaker is not None:
 
-        name = speaker.get("name")
+        name = speaker.name
 
         db.session.delete(speaker)
         db.session.commit()
 
         return make_response(
-            200,
             "Speaker {speaker_id}, {name}, was deleted".format(speaker_id=speaker_id, name=name),
+            200,
         )
     
     # otherwise, nope, didn't find that speaker
