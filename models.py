@@ -1,7 +1,7 @@
 from datetime import datetime
 from config import db, ma
 from marshmallow import fields
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_sqlalchemy.fields import Nested
 
 class Speaker(db.Model):
@@ -34,44 +34,21 @@ class Truth(db.Model):
         onupdate=datetime.utcnow
     )
 
-# former Truth class
-# class Truth(db.Model):
-#     __tablename__ = 'truth'
-#     id = db.Column(db.Integer, primary_key=True)
-#     speaker = db.Column(db.String(999))
-#     truthtext = db.Column(db.String(999))
-#     timestamp = db.Column(
-#         db.DateTime, 
-#         default=datetime.utcnow, 
-#         onupdate=datetime.utcnow
-#     )
-
-class SpeakerSchema(ma.SQLAlchemyAutoSchema):
+class SpeakerSchema(ModelSchema):
     class Meta:
         model = Speaker
         load_instance = True
         sqla_session = db.session
-    truths = fields.Nested('SpeakerTruthSchema', default=[], many=True)
-
-class SpeakerTruthSchema(ma.SQLAlchemyAutoSchema):
-    # """
-    # This class exists to get around a recursion issue
-    # """
-    truth_id = fields.Int()
-    speaker_id = fields.Int()
-    content = fields.Str()
-    timestamp = fields.Str()
-
-class TruthSchema(ma.SQLAlchemyAutoSchema):
-    class Meta:
-        model = Truth
-        sqla_session = db.session
-    speaker = fields.Nested('TruthSpeakerSchema', default=None)
-
-class TruthSpeakerSchema(ma.SQLAlchemyAutoSchema):
-    # """
-    # This class exists to get around a recursion issue
-    # """
     speaker_id = fields.Int()
     name = fields.Str()
     timestamp = fields.Str()
+    truths = Nested("TruthSchema", default=[], many=True, exclude=("speaker",))
+
+class TruthSchema(ModelSchema):
+    class Meta:
+        model = Truth
+        sqla_session = db.session
+    truth_id = fields.Int()
+    content = fields.Str()
+    timestamp = fields.Str()
+    speaker = Nested("SpeakerSchema", default=None)
