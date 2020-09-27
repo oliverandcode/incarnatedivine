@@ -77,20 +77,10 @@ class Entry extends React.Component {
         </label>
         <br />
         <label htmlFor="truth-id">
-          Enter existing truth ID:
+          Truth ID (update/delete):
           <input type="text" value={this.state.id} onChange={this.handleChange} name="truth-id" />
         </label>
         <br />
-
-        {/* 
-        <label htmlFor="truth-id">Choose a truth:</label>
-        <select name="truth-id">
-          {props.archiveCapture.map(
-            (truth) => 
-            (<option value="{truth.id}">{truth.truthtext}</option>)
-          )}
-        </select> 
-        */}
 
         <input type="button" value="Testify" onClick={(e) => this.props.onSubmit(this.state.truthtext, this.state.speaker)} />
         <input type="button" value="Update" onClick={(e) => this.props.onUpdate(this.state.truthtext, this.state.speaker, this.state.id)} />
@@ -110,7 +100,7 @@ class TruthCapture extends React.Component {
         // {id: 2, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "I cried at the temple at Burning Man"},
         // {id: 3, speaker: "Audre Lorde", timestamp: "2020-05-28 10:00:00", truthtext: "Your silence will not protect you"},
         // {id: 4, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "Selfishness"},
-        // {id: 5, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "There is a war going on"},
+        // {id: 5, speaker: "Bailey Davenport", timestamp: "2020-05-28 10:00:00", truthtext: "There is a war going on"},
         // {id: 6, speaker: "Oliver Ayers", timestamp: "2020-05-28 10:00:00", truthtext: "Gender is a myth"},
       ],
     };
