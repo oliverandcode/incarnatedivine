@@ -4,34 +4,6 @@ from config import db
 from models import Speaker, Truth
 
 # Data to initialize the database with
-# TRUTHS = [
-#     {
-#         'truthtext': 'Your silence will not protect you', 
-#         'speaker': 'Audre Lorde'
-#     },
-#     {
-#         'truthtext': 'Gender is a myth', 
-#         'speaker': 'Oliver Ayers'
-#     },
-#     {
-#         'truthtext': 'I like sunlight more than rain', 
-#         'speaker': 'Anonymous'
-#     },
-#     {
-#         'truthtext': 'I cried at the temple at Burning Man', 
-#         'speaker': 'Anonymous'
-#     },
-#     {
-#         'truthtext': 'Selfishness',
-#         'speaker': 'Anonymous'
-#     },
-#     {
-#         'truthtext': 'There is a war going on',
-#         'speaker': 'Bailey Davenport'
-#     }
-# ]
-
-# Data to initialize the database with
 SPEAKERS = [
     {
         "name": "Anonymous",
