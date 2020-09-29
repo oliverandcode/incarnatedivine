@@ -4,10 +4,21 @@ import './index.css';
 import axios from 'axios';
 import moment from 'moment';
 
+export function Speaker(props) {
+  return(
+    <tr>
+      <td>{props.speaker_id}</td>
+      <td>{props.name}</td>
+      <td>{props.timestamp}</td>
+    </tr>
+  );
+}
+
+
 export function Truth(props) {
   return(
     <tr>
-      <td>{props.id}</td>
+      <td>{props.truth_id}</td>
       <td>{props.content}</td>
       <td>{props.speaker}</td>
       <td>{props.timestamp}</td>
@@ -17,27 +28,52 @@ export function Truth(props) {
 
 export function Display(props) {
   return(
-    <div id="table">
-      <h1 id="list-title" className="list-title">Archive</h1>
-      <table id="truth-table" className="truth-table">
-        <thead></thead>
-        <tbody>
-          <tr id="table-head-row">
-            <th>ID</th>
-            <th>Truth</th>
-            <th>Speaker</th>
-            <th>Time</th>
-          </tr>
-            {props.truthDisplay.map(
-              (truth) =>
-              (<Truth key={truth.truth_id}
-                speaker={truth.speaker.name} 
-                id = {truth.truth_id} 
-                content={truth.content} 
-                timestamp={truth.timestamp} />)
-            )}
-        </tbody>
-      </table>
+    <div id="displaytables">
+        <div id="speakertable">
+          <h1 id="speaker-list-title" className="speaker-list-title">Speakers</h1>
+          <table id="speaker-table" className="speaker-table">
+            <thead>
+              <tr id="table-head-row">
+                <th>ID</th>
+                <th>Name</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {props.speakerDisplay.map(
+                (speaker) =>
+                (<Speaker key={speaker.speaker_id}
+                  speaker_id={speaker.speaker_id}
+                  name={speaker.name} 
+                  timestamp={speaker.timestamp} />)
+              )}
+            </tbody>
+          </table>
+        </div>
+        <hr />
+        <div id="truthtable">
+          <h1 id="truth-list-title" className="truth-list-title">Archive</h1>
+          <table id="truth-table" className="truth-table">
+            <thead>
+              <tr id="table-head-row">
+                <th>ID</th>
+                <th>Truth</th>
+                <th>Speaker</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {props.truthDisplay.map(
+                (truth) =>
+                (<Truth key={truth.truth_id}
+                  truth_id={truth.truth_id}
+                  content={truth.content} 
+                  speaker={truth.speaker.name} 
+                  timestamp={truth.timestamp} />)
+              )}
+            </tbody>
+          </table>
+        </div>
     </div>
   );  
 }
@@ -550,6 +586,7 @@ class TruthCapture extends React.Component {
 
   render() {
     const archiveTruths = this.state.allTruths;
+    const archiveSpeakers = this.state.allSpeakers;
 
     return (
       <div className="container">
@@ -562,7 +599,7 @@ class TruthCapture extends React.Component {
             />
           </div>
           <div className="display">
-            <Display truthDisplay={archiveTruths} />
+            <Display truthDisplay={archiveTruths} speakerDisplay={archiveSpeakers} />
           </div>
         </div>
       </div>
