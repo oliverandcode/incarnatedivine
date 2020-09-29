@@ -8,7 +8,7 @@ export function Truth(props) {
   return(
     <tr>
       <td>{props.id}</td>
-      <td>{props.truthtext}</td>
+      <td>{props.content}</td>
       <td>{props.speaker}</td>
       <td>{props.timestamp}</td>
     </tr>
@@ -28,12 +28,12 @@ export function Display(props) {
             <th>Speaker</th>
             <th>Time</th>
           </tr>
-            {props.archiveDisplay.map(
+            {props.truthDisplay.map(
               (truth) =>
-              (<Truth key={truth.id}
-                speaker={truth.speaker} 
-                id = {truth.id} 
-                truthtext={truth.truthtext} 
+              (<Truth key={truth.truth_id}
+                speaker={truth.speaker.name} 
+                id = {truth.truth_id} 
+                content={truth.content} 
                 timestamp={truth.timestamp} />)
             )}
         </tbody>
@@ -95,14 +95,143 @@ class TruthCapture extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      archiveCapture: [
-        {id: 1, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "I like sunlight more than rain"},
-        // {id: 2, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "I cried at the temple at Burning Man"},
-        // {id: 3, speaker: "Audre Lorde", timestamp: "2020-05-28 10:00:00", truthtext: "Your silence will not protect you"},
-        // {id: 4, speaker: "Anonymous", timestamp: "2020-05-28 10:00:00", truthtext: "Selfishness"},
-        // {id: 5, speaker: "Bailey Davenport", timestamp: "2020-05-28 10:00:00", truthtext: "There is a war going on"},
-        // {id: 6, speaker: "Oliver Ayers", timestamp: "2020-05-28 10:00:00", truthtext: "Gender is a myth"},
+      allSpeakers: [
+        {
+          speaker_id: 1,
+          name: "Anonymous",
+          timestamp: "1981-10-31 00:00:00",
+          truths: [
+            {
+              truth_id: 1,
+              content: "I like sunlight more than rain",
+              timestamp: "2014-09-27 12:00:00",
+            },
+            {
+              truth_id: 2,
+              content: "Selfishness",
+              timestamp: "2018-09-27 21:00:00",
+            },
+            {
+              truth_id: 3,
+              content: "I cried at the temple at Burning Man",
+              timestamp: "2019-06-27 12:00:00",
+            },
+          ],
+        },
+        {
+          speaker_id: 2,
+          name: "Audre Lorde",
+          timestamp: "1934-02-18 12:00:00",
+          truths: [
+            {
+              truth_id: 4,
+              content: "Your silence will not protect you",
+              timestamp: "1977-12-28 00:00:00",
+            },
+          ],
+        },
+        {
+          speaker_id: 3,
+          name: "Oliver Ayers",
+          timestamp: "1990-02-16 15:43:00",
+          truths: [
+            {
+              truth_id: 5,
+              content: "Gender is a myth",
+              timestamp: "2020-09-27 00:00:00",
+            },
+          ]
+        },
+        {
+          speaker_id: 4,
+          name: "Bailey Davenport",
+          timestamp: "1990-01-02 00:00:00",
+          truths: [
+            {
+              truth_id: 6,
+              content: "There is a war going on",
+              timestamp: "2017-09-27 00:00:00",
+            },
+            {
+              truth_id: 7,
+              content: "Your silence will not save you",
+              timestamp: "2009-09-27 00:00:00",
+            },
+          ],
+        },
       ],
+      allTruths: [
+        {
+          truth_id: 1,
+          content: "I like sunlight more than rain",
+          timestamp: "2014-09-27 12:00:00",
+          speaker: {
+            speaker_id: 1,
+            name: "Anonymous",
+            timestamp: "1981-10-31 00:00:00",
+          }
+        },
+        {
+          truth_id: 2,
+          content: "Selfishness",
+          timestamp: "2018-09-27 21:00:00",
+          speaker: {
+            speaker_id: 1,
+            name: "Anonymous",
+            timestamp: "1981-10-31 00:00:00",
+          }
+        },
+        {
+          truth_id: 3,
+          content: "I cried at the temple at Burning Man",
+          timestamp: "2019-06-27 12:00:00",
+          speaker: {
+            speaker_id: 1,
+            name: "Anonymous",
+            timestamp: "1981-10-31 00:00:00",
+          }
+        },
+        {
+          truth_id: 4,
+          content: "Your silence will not protect you",
+          timestamp: "1977-12-28 00:00:00",
+          speaker: {
+            speaker_id: 2,
+            name: "Audre Lorde",
+            timestamp: "1934-02-18 12:00:00",
+          }
+        },
+        {
+          truth_id: 5,
+          content: "Gender is a myth",
+          timestamp: "2020-09-27 00:00:00",
+          speaker: {
+            speaker_id: 3,
+            name: "Oliver Ayers",
+            timestamp: "1990-02-16 15:43:00",
+          }
+        },
+        {
+          truth_id: 6,
+          content: "There is a war going on",
+          timestamp: "2017-09-27 00:00:00",
+          speaker: {
+            speaker_id: 4,
+            name: "Bailey Davenport",
+            timestamp: "1990-01-02 00:00:00",
+          }
+        },
+        {
+          truth_id: 7,
+          content: "Your silence will not save you",
+          timestamp: "2009-09-27 00:00:00",
+          speaker: {
+            speaker_id: 4,
+            name: "Bailey Davenport",
+            timestamp: "1990-01-02 00:00:00",
+          }
+        },
+      ]
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleUpdate = this.handleUpdate.bind(this);
@@ -411,11 +540,16 @@ class TruthCapture extends React.Component {
     let remoteTruths = await axios.get("http://localhost:5000/api/truths");
     remoteTruths = remoteTruths.data;
     console.log("[truthcapture/componentDidMount]: truths received:", remoteTruths);
-    this.setState({ archiveCapture: remoteTruths });
+    this.setState({ allTruths: remoteTruths });
+
+    let remoteSpeakers = await axios.get("http://localhost:5000/api/speakers");
+    remoteSpeakers = remoteSpeakers.data;
+    console.log("[truthcapture/componentDidMount]: speakers received:", remoteSpeakers);
+    this.setState({ allSpeakers: remoteSpeakers});
   }
 
   render() {
-    const archiveArchive = this.state.archiveCapture;
+    const archiveTruths = this.state.allTruths;
 
     return (
       <div className="container">
@@ -428,7 +562,7 @@ class TruthCapture extends React.Component {
             />
           </div>
           <div className="display">
-            <Display archiveDisplay={archiveArchive} />
+            <Display truthDisplay={archiveTruths} />
           </div>
         </div>
       </div>
