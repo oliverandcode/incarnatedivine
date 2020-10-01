@@ -14,7 +14,6 @@ export function Speaker(props) {
   );
 }
 
-
 export function Truth(props) {
   return(
     <tr>
@@ -28,9 +27,9 @@ export function Truth(props) {
 
 export function Display(props) {
   return(
-    <div id="displaytables">
-        <div id="speakertable">
-          <h1 id="speaker-list-title" className="speaker-list-title">Speakers</h1>
+    <div id="display-tables" className="display-tables">
+        <div id="speaker-table-div" className="speaker-table-div">
+          <h3 id="speaker-list-title" className="speaker-list-title">Speakers</h3>
           <table id="speaker-table" className="speaker-table">
             <thead>
               <tr id="table-head-row">
@@ -50,9 +49,8 @@ export function Display(props) {
             </tbody>
           </table>
         </div>
-        <hr />
-        <div id="truthtable">
-          <h1 id="truth-list-title" className="truth-list-title">Archive</h1>
+        <div id="truth-table-div" className="truth-table-div">
+          <h3 id="truth-list-title" className="truth-list-title">Archive</h3>
           <table id="truth-table" className="truth-table">
             <thead>
               <tr id="table-head-row">
@@ -78,51 +76,92 @@ export function Display(props) {
   );  
 }
 
-class Entry extends React.Component {
+class SpeakerEntry extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      truthtext: '',
-      speaker: '',
-      id: '',
+      name: "",
+      speaker_id: "",
     };
     this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange(event) {
-    if (event.target.name === "truthtext") {
-      this.setState({truthtext: event.target.value});
-    } else if (event.target.name === "speaker") {
-      this.setState({speaker: event.target.value});
-    } else if (event.target.name === "truth-id") {
-      this.setState({id: event.target.value});
+    if (event.target.name === "name") {
+      this.setState({name: event.target.value});
+    } else if (event.target.name === "speaker-id") {
+      this.setState({speaker_id: event.target.value});
     }
   }
 
   render() {
     return (
-      <form className="truth-form">
-        <label htmlFor="truthtext">
-          What is your truth? 
-          <input type="text" value={this.state.truthtext} onChange={this.handleChange} name="truthtext" />
-        </label>
-        <br />
-        <label htmlFor="speaker">
-          Who is the truth speaker?
-          <input type="text" value={this.state.speaker} onChange={this.handleChange} name="speaker" />
-        </label>
-        <br />
-        <label htmlFor="truth-id">
-          Truth ID (update/delete):
-          <input type="text" value={this.state.id} onChange={this.handleChange} name="truth-id" />
-        </label>
-        <br />
+      <div id="speaker-form-div" className="speaker-form-div">
+        <form id="speaker-form" className="speaker-form">
+          <label htmlFor="name">
+            Speaker, what is your name?
+            <input type="text" value={this.state.name} onChange={this.handleChange} name="name" />
+          </label>
+          <br />
+          <label htmlFor="speaker-id">
+            Speaker ID (update/delete)
+            <input type="text" value={this.state.speaker_id} onChange={this.handleChange} name="speaker-id" />
+          </label>
+          <br />
+          <input type="button" value="Create" onClick={(e) => this.props.onCreateSpeaker(this.state.name)} /> {/* TODO: write function for CreateSpeaker */}
+          <input type="button" value="Update" onClick={(e) => this.props.onUpdateSpeaker(this.state.name, this.state.speaker_id)} /> {/* TODO: write function for UpdateSpeaker */}
+          <input type="button" value="Delete" onClick={(e) => this.props.onDeleteSpeaker(this.state.speaker_id)} /> {/* TODO: write function for DeleteSpeaker */}
+        </form>
+      </div>
+    );
+  }
+}
 
-        <input type="button" value="Testify" onClick={(e) => this.props.onSubmit(this.state.truthtext, this.state.speaker)} />
-        <input type="button" value="Update" onClick={(e) => this.props.onUpdate(this.state.truthtext, this.state.speaker, this.state.id)} />
-        <input type="button" value="Delete" onClick={(e) => this.props.onDelete(this.state.id)} />
+class TruthEntry extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      content: "",
+      speaker_id: "",
+      truth_id: "",
+    };
+    this.handleChange = this.handleChange.bind(this);
+  }
 
-      </form>
+  handleChange(event) {
+    if (event.target.name === "content") {
+      this.setState({content: event.target.value});
+    } else if (event.target.name === "speaker-id") {
+      this.setState({speaker_id: event.target.value});
+    } else if (event.target.name === "truth-id") {
+      this.setState({truth_id: event.target.value});
+    }
+  }
+
+  render() {
+    return (
+      <div id="truth-form-div" className="truth-form-div">
+        <form id="truth-form" className="truth-form">
+          <label htmlFor="content">
+            Speaker, what is your truth?
+            <input type="text" value={this.state.content} onChange={this.handleChange} name="content" />
+          </label>
+          <br />
+          <label htmlFor="speaker-id">
+            Speaker ID
+            <input type="text" value={this.state.speaker_id} onChange={this.handleChange} name="speaker-id" />
+          </label>
+          <br />
+          <label htmlFor="truth-id">
+            Truth ID (update/delete)
+            <input type="text" value={this.state.truth_id} onChange={this.handleChange} name="truth-id" />
+          </label>
+          <br />
+          <input type="button" value="Testify" onClick={(e) => this.props.onTestify(this.state.content, this.state.speaker_id)} /> {/* TODO: rewrite function for Testify */}
+          <input type="button" value="Update" onClick={(e) => this.props.onUpdateTruth(this.state.content, this.state.speaker_id, this.state.truth_id)} /> {/* TODO: rewrite function for UpdateTruth */}
+          <input type="button" value="Delete" onClick={(e) => this.props.onDeleteTruth(this.state.speaker_id, this.state.truth_id)} /> {/* TODO: rewrite function for DeleteTruth */}
+        </form>
+      </div>
     );
   }
 }
@@ -269,58 +308,77 @@ class TruthCapture extends React.Component {
         },
       ]
     };
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleUpdate = this.handleUpdate.bind(this);
-    this.handleDelete = this.handleDelete.bind(this);
+    this.handleCreateSpeaker = this.handleCreateSpeaker.bind(this);
+    this.handleUpdateSpeaker = this.handleUpdateSpeaker.bind(this);
+    this.handleDeleteSpeaker = this.handleDeleteSpeaker.bind(this);
+    
+    this.handleTestify = this.handleTestify.bind(this);
+    this.handleUpdateTruth = this.handleUpdateTruth.bind(this);
+    this.handleDeleteTruth = this.handleDeleteTruth.bind(this);
   }
 
-  existence(inputID) {
-    let archiveExist = this.state.archiveCapture.slice();
-    let arrayID = archiveExist.map(truth => truth.id);
-    let i = arrayID.indexOf(parseInt(inputID));
-    if (arrayID[i]) {
+  handleCreateSpeaker(name) {
+    // TODO: write function
+  }
+
+  handleUpdateSpeaker(name, speaker_id) {
+    // TODO: write function
+  }
+
+  handleDeleteSpeaker(speaker_id) {
+    // TODO: write function
+  }
+
+  truthExists(truth_id, speaker_id) {
+    // TODO: make sure function accounts for edge case where a truth is somehow created that has a duplicate truth_id but is assigned to a different speaker and is in fact unique? not supposed to happen. anyway, always look up truths by both speaker_id and truth_id?
+    let archiveExist = this.state.allTruths.slice();
+    let truthIDarray = archiveExist.map(truth => truth.truth_id);
+    let i = truthIDarray.indexOf(parseInt(truth_id));
+    if (truthIDarray[i]) {
       return true;
     } else {
       return false;
     }
   }
 
-  duplicateExists(truthtext, speaker) {
-    let archiveDuplicate = this.state.archiveCapture.slice();
-    let textArray = archiveDuplicate.map(truth => truth.truthtext);
-    let speakerArray = archiveDuplicate.map(truth => truth.speaker);
-    let textIndex = textArray.indexOf(truthtext);
-    let speakerIndex = speakerArray.indexOf(speaker);
-    // if both truthtext and speaker have existing matches...
-    if (textArray[textIndex] && speakerArray[speakerIndex]) {
+  truthDuplicate(content, speaker_id) {
+    // TODO: make this work now that speakers are objects and not just string properties
+    let archiveDuplicate = this.state.allTruths.slice();
+    let contentArray = archiveDuplicate.map(truth => truth.content);
+    let speakerArray = archiveDuplicate.map(truth => truth.speaker.speaker_id);
+    let contentIndex = contentArray.indexOf(content);
+    let speakerIndex = speakerArray.indexOf(parseInt(speaker_id));
+    // if both content and speaker_id have existing matches...
+    if (contentArray[contentIndex] && speakerArray[speakerIndex]) {
       // ...check to see if their index values match
-      if (textIndex === speakerIndex) {
-        // if their index values match, they belong to the same truth object, which means there IS a duplicate
+      if (contentIndex === speakerIndex) {
+        // if their index values match, then this truth has already been spoken by the speaker with this speaker_id
         return true;
       } else {
         // otherwise (if the index values do not match) there's no duplicate
         return false;
       }
     } else {
-      // if either truthtext or speaker doesn't have a match, it's fine, there's no duplicate
+      // if either content or speaker_id doesn't have a match, it's fine, there's no duplicate
       return false;
     }
   }
 
-  handleSubmit(truthtext, speaker) {
-    let archiveSubmit = this.state.archiveCapture.slice();
+  handleTestify(content, speaker_id) {
+    // TODO: refactor
+    let archiveTestify = this.state.allTruths.slice();
     
-    if (truthtext && speaker) {
-      if (this.duplicateExists(truthtext, speaker)) {
-        console.log("error: truthtext with speaker already exists");
+    if (content && speaker_id) {
+      if (this.truthDuplicate(content, speaker_id)) {
+        console.log("error: this speaker already has an identical truth");
       } else {
         const timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
-        archiveSubmit.push(
-          {speaker: speaker, timestamp: timestamp, truthtext: truthtext}
+        archiveTestify.push(
+          {speaker_id: speaker_id, timestamp: timestamp, content: content}
         );
         axios.post('http://localhost:5000/api/truths', {
-          truthtext: truthtext,
-          speaker: speaker
+          content: content,
+          speaker_id: speaker_id
         })
         .then(function (response) {
           // handle success
@@ -332,220 +390,33 @@ class TruthCapture extends React.Component {
         })
       }
     } else {
-      console.log("error: ", "problem with truthtext or speaker input");
+      console.log("error: ", "problem with content or speaker input");
     }
 
-    this.setState({archiveCapture: archiveSubmit});
+    this.setState({allTruths: archiveTestify});
   }
 
-  handleUpdate(truthtext, speaker, inputID) {
-    let archiveUpdate = this.state.archiveCapture.slice();
-    let arrayID = archiveUpdate.map(truthObject => truthObject.id);
+  handleUpdateTruth(content, speaker_id, truth_id) {
+    // TODO: refactor
+    let archiveUpdate = this.state.allTruths.slice();
+    let arrayID = archiveUpdate.map(truthObject => truthObject.truth_id);
 
-    if (inputID) {
-      const baseURL = "http://localhost:5000/api/truths/";
-      let truthURL = baseURL + inputID;
-
-      const updateTimestamp = moment().format('YYYY-MM-DD HH:mm:ss');
-  
-      let truthID = parseInt(inputID);
-
-      let truthIndex = arrayID.indexOf(truthID);
-      let thisTruth = archiveUpdate[truthIndex];
-      
-      var alertString = "alert string default text";
-
-      if (this.existence(inputID)) {
-        let currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
-
-        console.log("updating this truth: \n \n", currentTruthStatusString);
-
-        if (truthtext && speaker) {
-          // are both truthtext and speaker identical to current values? if so, prompt user to change one or both of them. if either of them are different from current values, update that value
-
-          if (truthtext !== thisTruth.truthtext) {
-            // truthtext is new
-            // check speaker for difference then update one or both values 
-            if (speaker !== thisTruth.speaker) {
-              // truthtext is new, and so is speaker
-              // update BOTH truthtext AND speaker
-              // update timestamp
-
-              thisTruth.truthtext = truthtext;
-              thisTruth.speaker = speaker;
-              thisTruth.timestamp = updateTimestamp;
-
-              currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
-              console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
-              alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
-              alert(alertString);
-
-              axios.put(truthURL, {
-                truthtext: truthtext,
-                speaker: speaker,
-                timestamp: updateTimestamp
-              })
-              .then(function (response) {
-                // handle success
-                console.log(response);
-              })
-              .catch(function (error) {
-                // handle error
-                console.log(error);
-              })
-            } else {
-              // truthtext is new, but speaker is NOT
-              // update truthtext but NOT speaker (because it's the same) - is this an unnecessary extra step? as long as one of the values is different I have to update the truth object, and I can just set it to the desired values even if one of them doesn't change anything - the timestamp will still change, and it should still update correctly.
-              // update timestamp
-
-              thisTruth.truthtext = truthtext;
-              thisTruth.timestamp = updateTimestamp;
-
-              currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
-              console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
-              alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
-              alert(alertString);
-
-              axios.put(truthURL, {
-                truthtext: truthtext,
-                timestamp: updateTimestamp
-              })
-              .then(function (response) {
-                // handle success
-                console.log(response);
-              })
-              .catch(function (error) {
-                // handle error
-                console.log(error);
-              })
-            }
-          } else if (speaker !== thisTruth.speaker) {
-            // truthtext is entered, unchanged, but speaker is new
-            // update speaker but NOT truthtext
-            // update timestamp
-            thisTruth.speaker = speaker;
-            thisTruth.timestamp = updateTimestamp;
-
-            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
-            console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
-            alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
-            alert(alertString);
-
-            axios.put(truthURL, {
-              speaker: speaker,
-              timestamp: updateTimestamp
-            })
-            .then(function (response) {
-              // handle success
-              console.log(response);
-            })
-            .catch(function (error) {
-              // handle error
-              console.log(error);
-            })
-          } else {
-            // valid id was input, truthtext entered but identical to current value, speaker entered but identical to current value. no update, prompt user to change one or both values.
-            console.log("truthtext and speaker both identical to current values. no update needed.");
-            alertString = "No change detected. Enter new truthtext or speaker for this truth? \n \n" + currentTruthStatusString;
-            alert(alertString);
-          }
-        } else if (truthtext) {
-          // if truthtext is entered but speaker is blank, check if truthtext is identical to current value. if not, update truthtext (do NOT update speaker!). if it's identical, prompt user to change it.
-          if (truthtext !== thisTruth.truthtext) {
-            // update truthtext. do NOT change the speaker!
-            // update timestamp
-            thisTruth.truthtext = truthtext;
-            thisTruth.timestamp = updateTimestamp;
-
-            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
-            console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
-            alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
-            alert(alertString);
-
-            axios.put(truthURL, {
-              truthtext: truthtext,
-              timestamp: updateTimestamp
-            })
-            .then(function (response) {
-              // handle success
-              console.log(response);
-            })
-            .catch(function (error) {
-              // handle error
-              console.log(error);
-            })
-          } else {
-            // valid id was input, truthtext entered, speaker blank, truthtext identical to current value. no update, prompt user to change truthtext.
-            console.log("truthtext entered but identical to current value. speaker field is blank.");
-            alertString = "No change detected. Enter new truthtext for this truth? \n \n" + currentTruthStatusString;
-            alert(alertString);
-          }
-        } else if (speaker) {
-          // if speaker is entered but truthtext is blank, check if speaker is identical to current value. if not, update speaker (do NOT update truthtext!). if it's identical, prompt user to change it.
-          if (speaker !== thisTruth.speaker) {
-            // update speaker. do NOT change the truthtext!
-            // update timestamp
-            thisTruth.speaker = speaker;
-            thisTruth.timestamp = updateTimestamp;
-
-            currentTruthStatusString = "current truthtext: " + thisTruth.truthtext + "\n current speaker: " + thisTruth.speaker + "\n id: " + thisTruth.id;
-            console.log("truth successfully updated. current truth status: \n \n", currentTruthStatusString);
-            alertString = "Truth successfully updated! Current truth status: \n \n" + currentTruthStatusString;
-            alert(alertString);
-            
-            axios.put(truthURL, {
-              speaker: speaker,
-              timestamp: updateTimestamp
-            })
-            .then(function (response) {
-              // handle success
-              console.log(response);
-            })
-            .catch(function (error) {
-              // handle error
-              console.log(error);
-            })
-          } else {
-            // valid id was input, speaker entered, truthtext blank, speaker identical to current value. no update, prompt user to change speaker.
-            console.log("speaker entered but identical to current value. truthtext field is blank.");
-            alertString = "No change detected. Enter new speaker for this truth? \n \n" + currentTruthStatusString;
-            alert(alertString);
-          }
-        } else {
-          // id was input, matches existing truth id, but both speaker and truthtext fields are blank. no update, prompt user for speaker or truthtext input.
-          console.log("speaker and truthtext fields left blank");
-          alertString = "No truthtext or speaker input detected. Enter new truthtext or speaker for this truth? \n \n" + currentTruthStatusString;
-          alert(alertString);
-        }
-
-      } else {
-        // inputID was entered but doesn't match any ids of truths in database
-        console.log("error: truth with ID #", inputID, " not found");
-        alertString = "Truth with ID #" + inputID + " not found. Try a different ID.";
-        alert(alertString);
-      }
-    } else {
-      // no id input recognized
-      console.log("error: ", "problem with ID input: ", inputID);
-      alertString = "Please enter an ID for a truth to be updated.";
-      alert(alertString);
-    }
-
-    this.setState({archiveCapture: archiveUpdate});
+    this.setState({allTruths: archiveUpdate});
   }
 
-  handleDelete(inputID) {
+  handleDeleteTruth(inputID) {
+    // TODO: refactor
     let truthID = parseInt(inputID);
 
-    let archiveDelete = this.state.archiveCapture.slice();
+    let archiveDelete = this.state.allTruths.slice();
     let arrayID = archiveDelete.map(truthObject => truthObject.id);
 
     let truthIndex = arrayID.indexOf(truthID);
     let thisTruth = archiveDelete[truthIndex];
 
     if (inputID) {
-      if (this.existence(inputID)) {
-        alert("are you sure you want to delete this truth: '" + thisTruth.truthtext + "'?");
+      if (this.truthExists(inputID)) {
+        alert("are you sure you want to delete this truth: '" + thisTruth.content + "'?");
         archiveDelete = archiveDelete.filter(truthObject => truthObject.id !== truthID);
 
         let baseURL = 'http://localhost:5000/api/truths/';
@@ -567,7 +438,7 @@ class TruthCapture extends React.Component {
       console.log("error: ", "problem with ID input ", inputID);
     }
 
-    this.setState({archiveCapture: archiveDelete});
+    this.setState({allTruths: archiveDelete});
   }
 
   async componentDidMount() {
@@ -592,12 +463,18 @@ class TruthCapture extends React.Component {
       <div className="container">
         <div id="truthcapture">
           <div className="entry">
-            <Entry 
-              onSubmit={this.handleSubmit} 
-              onUpdate={this.handleUpdate} 
-              onDelete={this.handleDelete}
+            <SpeakerEntry
+              onCreateSpeaker={this.handleCreateSpeaker}
+              onUpdateSpeaker={this.handleUpdateSpeaker}
+              onDeleteSpeaker={this.handleDeleteSpeaker}
+             />
+            <TruthEntry 
+              onTestify={this.handleTestify} 
+              onUpdateTruth={this.handleUpdateTruth} 
+              onDeleteTruth={this.handleDeleteTruth}
             />
           </div>
+          <hr />
           <div className="display">
             <Display truthDisplay={archiveTruths} speakerDisplay={archiveSpeakers} />
           </div>
