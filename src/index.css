@@ -8,17 +8,21 @@ body {
   padding: 10px;
 }
 
-.list-title {
+/* .list-title {
   text-align: center;
+} */
+
+.entry {
+  overflow: auto;
 }
 
-.truth-table {
-  width: 100%;
-  border-collapse: collapse;
+.speaker-form-div {
+  float: left;
+  width: 45%;
 }
 
-.truth-form {
-  width: 50%;
+.speaker-form {
+  width: auto;
   margin-left: auto;
   margin-right: auto;
   padding: 5px;
@@ -26,3 +30,41 @@ body {
   border-radius: 3px;
   margin-bottom: 5px;
 }
+
+.truth-form-div {
+  float: right;
+  width: 45%;
+}
+
+.truth-form {
+  width: auto;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 5px;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+  margin-bottom: 5px;
+}
+
+.display-tables {
+  overflow: auto;
+}
+
+.speaker-table-div {
+  float: left;
+  width: 49%;
+}
+
+.speaker-table {
+  border-collapse: collapse;
+}
+
+.truth-table-div {
+  float: right;
+  width: 49%;
+}
+
+.truth-table {
+  border-collapse: collapse;
+}
+
