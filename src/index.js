@@ -317,8 +317,130 @@ class TruthCapture extends React.Component {
     this.handleDeleteTruth = this.handleDeleteTruth.bind(this);
   }
 
-  handleCreateSpeaker(name) {
-    // TODO: write function
+  speakerExists(speaker_id) {
+    let speakers = this.state.allSpeakers.slice();
+    let speakerIDs = speakers.map(speaker => speaker.speaker_id);
+    let i = speakerIDs.indexOf(parseInt(speaker_id));
+    if (speakerIDs[i]) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  speakerTwinExists(name) {
+    // this checks to see if there are any speakers in the speakers database with the same "name" property as the input name
+    let speakers = this.state.allSpeakers.slice();
+    let speakerNames = speakers.map(speaker => speaker.name);
+    let i = speakerNames.indexOf(name);
+    if (speakerNames[i]) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  findSpeakerByName(name) {
+    // this function looks up a speaker object by its name property, and if it exists, returns the speaker_id
+    // BUG: this function can't find a newly created speaker, for some reason - despite adding "this.mountSpeakers()" to try to refresh the data. clearly that's not how you do that, but i don't know how to fix it. it doesn't strictly matter, at this point, but it bothers me that i don't understand it. 
+    // TODO: come back to this and figure it out.
+    let message = "";
+    this.mountSpeakers();
+    let speakers = this.state.allSpeakers.slice();
+    let speakerNames = speakers.map(speaker => speaker.name);
+    let i = speakerNames.indexOf(name);
+    let thisSpeaker = speakers[i];
+    if (thisSpeaker) {
+      // successfully identified a speaker object with this name property
+      message = "speaker found";
+      console.log(message);
+      alert(message);
+
+      if (thisSpeaker.name) {
+        // found speaker with this name
+        message = "found speaker with name \"" + name + "\"";
+        console.log(message);
+        alert(message);
+
+        if (thisSpeaker.speaker_id || (thisSpeaker.speaker_id === 0)) {
+          // found speaker's speaker_id
+          message = "found speaker_id: " + thisSpeaker.speaker_id + "for speaker with name \"" + thisSpeaker.name + "\"";
+          console.log(message);
+          alert(message);
+
+          return thisSpeaker.speaker_id;
+        } else {
+          // did not find speaker's speaker_id
+          message = "did not find speaker_id";
+          console.log(message);
+          alert(message);
+
+          return undefined;
+        }
+      } else {
+        // did not find speaker with this name
+        message = "did not find speaker with this name";
+        console.log(message);
+        alert(message);
+
+        return undefined;
+      }
+    } else {
+      // did not identify a speaker object
+      message = "no speaker found";
+      console.log(message);
+      alert(message);
+
+      return undefined;
+    }
+
+  }
+
+  handleCreateSpeaker(input_name) {
+    // post URL
+    let postURL = "http://localhost:5000/api/speakers";
+    // load the speakers data (unnecessary?)
+    this.mountSpeakers();
+    // for feedback
+    let message = "";
+    // establish that a name was input
+    if (input_name) {
+      // proceed
+      // check for duplicate
+      if (this.speakerTwinExists(input_name)) {
+        // oh dang, a speaker with this name already exists
+        message = "error: speaker with name \"" + input_name +"\" already exists";
+        console.log(message);
+        alert(message);
+      } else {
+        // no duplicate! add new speaker
+        axios.post(postURL, {
+          name: input_name
+        })
+        .then(function (response) {
+          // handle success
+          console.log(response);
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        });
+        // set state (frontend) to match updated database (backend)
+        this.mountSpeakers();
+        // BUG: for some reason, this does not behave as expected. the findSpeakerByName function returns "undefined" - i think this is because of the asynchronicity of mountSpeakers, but using a .then() statement on it didn't fix the problem, because i couldn't access "this" or findSpeakerByName within the .then() statement. for all practical purposes, handleCreateSpeaker functions just fine, and i don't 100% need to provide this feedback to the user in this way, because right after this, the speakers table display updates and the user can see that their speaker has been added, and what the speaker_id is. TODO: investigate
+        // confirm that the new speaker is loaded
+        let new_speaker_id = this.findSpeakerByName(input_name);
+        // report success to user
+        message = "speaker #" + new_speaker_id + " \"" + input_name + "\" was added to the database";
+        console.log(message);
+        alert(message);
+      }
+    } else {
+      // no name input
+      message = "error: problem with name input"
+      console.log(message);
+      alert(message);
+    }
   }
 
   handleUpdateSpeaker(name, speaker_id) {
@@ -368,32 +490,6 @@ class TruthCapture extends React.Component {
     // TODO: refactor
     let archiveTestify = this.state.allTruths.slice();
     
-    if (content && speaker_id) {
-      if (this.truthDuplicate(content, speaker_id)) {
-        console.log("error: this speaker already has an identical truth");
-      } else {
-        const timestamp = moment().format('YYYY-MM-DD HH:mm:ss');
-        archiveTestify.push(
-          {speaker_id: speaker_id, timestamp: timestamp, content: content}
-        );
-        axios.post('http://localhost:5000/api/truths', {
-          content: content,
-          speaker_id: speaker_id
-        })
-        .then(function (response) {
-          // handle success
-          console.log(response);
-        })
-        .catch(function (error) {
-          // handle error
-          console.log(error);
-        })
-      }
-    } else {
-      console.log("error: ", "problem with content or speaker input");
-    }
-
-    this.setState({allTruths: archiveTestify});
   }
 
   handleUpdateTruth(content, speaker_id, truth_id) {
@@ -441,18 +537,31 @@ class TruthCapture extends React.Component {
     this.setState({allTruths: archiveDelete});
   }
 
-  async componentDidMount() {
-    console.log("truth capture app loaded");
-
-    let remoteTruths = await axios.get("http://localhost:5000/api/truths");
-    remoteTruths = remoteTruths.data;
-    console.log("[truthcapture/componentDidMount]: truths received:", remoteTruths);
-    this.setState({ allTruths: remoteTruths });
+  async mountSpeakers() {
+    console.log("[mountSpeakers]: re/loading speakers data");
 
     let remoteSpeakers = await axios.get("http://localhost:5000/api/speakers");
     remoteSpeakers = remoteSpeakers.data;
-    console.log("[truthcapture/componentDidMount]: speakers received:", remoteSpeakers);
-    this.setState({ allSpeakers: remoteSpeakers});
+    console.log("[mountSpeakers]: speakers received:", remoteSpeakers);
+    this.setState({ allSpeakers: remoteSpeakers });
+  }
+
+  async mountTruths() {
+    console.log("[mountTruths]: re/loading truths data");
+
+    let remoteTruths = await axios.get("http://localhost:5000/api/truths");
+    remoteTruths = remoteTruths.data;
+    console.log("[mountTruths]: truths received:", remoteTruths);
+    this.setState({ allTruths: remoteTruths });
+  }
+
+  async componentDidMount() {
+    console.log("truth capture app loaded");
+
+    this.mountSpeakers();
+
+    this.mountTruths();
+
   }
 
   render() {
