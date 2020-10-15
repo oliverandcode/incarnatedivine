@@ -449,6 +449,50 @@ class TruthCapture extends React.Component {
 
   handleDeleteSpeaker(speaker_id) {
     // TODO: write function
+    // TODO: instead of deleting truths belonging to speaker, reassign them to "Anonymous" - write a reassignation function
+    // delete URL
+    let deleteURL = "http://localhost:5000/api/speakers/" + speaker_id;
+    // load the speakers data (unnecessary?)
+    this.mountSpeakers();
+    // for feedback
+    var message = "";
+    // establish that a speaker_id was input
+    if (speaker_id) {
+      // proceed
+      // check to see if a speaker with this speaker_id exists
+      if (this.speakerExists(speaker_id)) {
+        // speaker found for input speaker_id! proceed
+        let speakers = this.state.allSpeakers.slice();
+        let speakerIDs = speakers.map(speaker => speaker.speaker_id);
+        let i = speakerIDs.indexOf(parseInt(speaker_id));
+        let thisSpeaker = speakers[i];
+        message = "Are you sure you want to delete speaker #" + speaker_id + ": \"" + thisSpeaker.name + "\"?";
+        alert(message);
+        // delete speaker
+        axios.delete(deleteURL)
+        .then(function (response) {
+          // handle success
+          console.log(response);
+        })
+        .catch(function (error) {
+          // handle error
+          console.log(error);
+        })
+        message = "Speaker #" + speaker_id + " (" + thisSpeaker.name + ") was successfully deleted.";
+        console.log(message);
+        alert(message);
+      } else {
+        // no speaker with this speaker_id
+        message = "error: speaker #" + speaker_id + " not found";
+        console.log(message);
+        alert(message);
+      }
+    } else {
+      // no speaker_id input
+      message = "error: no speaker_id received";
+      console.log(message);
+      alert(message);
+    }
   }
 
   truthExists(truth_id, speaker_id) {
@@ -463,78 +507,24 @@ class TruthCapture extends React.Component {
     }
   }
 
-  truthDuplicate(content, speaker_id) {
-    // TODO: make this work now that speakers are objects and not just string properties
-    let archiveDuplicate = this.state.allTruths.slice();
-    let contentArray = archiveDuplicate.map(truth => truth.content);
-    let speakerArray = archiveDuplicate.map(truth => truth.speaker.speaker_id);
-    let contentIndex = contentArray.indexOf(content);
-    let speakerIndex = speakerArray.indexOf(parseInt(speaker_id));
-    // if both content and speaker_id have existing matches...
-    if (contentArray[contentIndex] && speakerArray[speakerIndex]) {
-      // ...check to see if their index values match
-      if (contentIndex === speakerIndex) {
-        // if their index values match, then this truth has already been spoken by the speaker with this speaker_id
-        return true;
-      } else {
-        // otherwise (if the index values do not match) there's no duplicate
-        return false;
-      }
-    } else {
-      // if either content or speaker_id doesn't have a match, it's fine, there's no duplicate
-      return false;
-    }
+  truthTwinExists(content, speaker_id) {
+    // TODO: refactor
+    // code
   }
 
   handleTestify(content, speaker_id) {
     // TODO: refactor
-    let archiveTestify = this.state.allTruths.slice();
-    
+    // code    
   }
 
   handleUpdateTruth(content, speaker_id, truth_id) {
     // TODO: refactor
-    let archiveUpdate = this.state.allTruths.slice();
-    let arrayID = archiveUpdate.map(truthObject => truthObject.truth_id);
-
-    this.setState({allTruths: archiveUpdate});
+    // code
   }
 
   handleDeleteTruth(inputID) {
     // TODO: refactor
-    let truthID = parseInt(inputID);
-
-    let archiveDelete = this.state.allTruths.slice();
-    let arrayID = archiveDelete.map(truthObject => truthObject.id);
-
-    let truthIndex = arrayID.indexOf(truthID);
-    let thisTruth = archiveDelete[truthIndex];
-
-    if (inputID) {
-      if (this.truthExists(inputID)) {
-        alert("are you sure you want to delete this truth: '" + thisTruth.content + "'?");
-        archiveDelete = archiveDelete.filter(truthObject => truthObject.id !== truthID);
-
-        let baseURL = 'http://localhost:5000/api/truths/';
-        let truthURL = baseURL + thisTruth.id.toString();
-
-        axios.delete(truthURL)
-        .then(function (response) {
-          // handle success
-          console.log(response);
-        })
-        .catch(function (error) {
-          // handle error
-          console.log(error);
-        })
-      } else {
-        console.log("error: ", "truth #", inputID, " not found");
-      }
-    } else {
-      console.log("error: ", "problem with ID input ", inputID);
-    }
-
-    this.setState({allTruths: archiveDelete});
+    // code
   }
 
   async mountSpeakers() {
