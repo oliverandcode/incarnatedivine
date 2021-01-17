@@ -1,6 +1,6 @@
 from datetime import datetime
 from config import db, ma
-from marshmallow import fields
+from marshmallow import fields, EXCLUDE
 from marshmallow_sqlalchemy import ModelSchema
 from marshmallow_sqlalchemy.fields import Nested
 
@@ -13,7 +13,7 @@ class Speaker(db.Model):
         default=datetime.utcnow,
         onupdate=datetime.utcnow
     )
-    # what does "delete-orphan" do? if it deletes truths that don't have speakers attached, I want to change that. truths that don't have speakers attached should be reassigned to Anonymous, not deleted. It looks like I'll have to change both delete-orphan and single-parent?
+    # what does "delete-orphan" do? or "single_parent"?
     truths = db.relationship(
         "Truth",
         backref="speaker",
@@ -48,6 +48,7 @@ class TruthSchema(ModelSchema):
     class Meta:
         model = Truth
         sqla_session = db.session
+        unknown = EXCLUDE
     truth_id = fields.Int()
     content = fields.Str()
     timestamp = fields.Str()
