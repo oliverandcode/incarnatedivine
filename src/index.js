@@ -437,7 +437,7 @@ class TruthCapture extends React.Component {
   // TODO: bug with user feedback, not critical (see below)
   handleCreateSpeaker(name) {
     // post URL
-    let postURL = "http://localhost:5000/api/speakers";
+    let postSpeakerURL = "http://localhost:5000/api/speakers";
     // load the speakers data (unnecessary?)
     this.mountSpeakers();
     // for feedback
@@ -453,7 +453,7 @@ class TruthCapture extends React.Component {
         alert(message);
       } else {
         // no duplicate! add new speaker
-        axios.post(postURL, {
+        axios.post(postSpeakerURL, {
           name: name
         })
         .then(function (response) {
@@ -490,8 +490,6 @@ class TruthCapture extends React.Component {
 
   handleDeleteSpeaker(speaker_id) {
     // TODO: instead of deleting truths belonging to speaker, reassign them to "Anonymous" - write a reassignation function
-    // delete URL
-    let deleteURL = "http://localhost:5000/api/speakers/" + speaker_id;
     // load the speakers data (unnecessary?)
     this.mountSpeakers();
     // for feedback
@@ -499,6 +497,8 @@ class TruthCapture extends React.Component {
     // establish that a speaker_id was input
     if (speaker_id) {
       // proceed
+      // delete URL
+      let deleteSpeakerURL = "http://localhost:5000/api/speakers/" + speaker_id;
       // check to see if a speaker with this speaker_id exists
       if (this.speakerExists(speaker_id)) {
         // speaker found for input speaker_id! proceed
@@ -509,7 +509,7 @@ class TruthCapture extends React.Component {
         message = "Are you sure you want to delete speaker #" + speaker_id + ": \"" + thisSpeaker.name + "\"?";
         alert(message);
         // delete speaker
-        axios.delete(deleteURL)
+        axios.delete(deleteSpeakerURL)
         .then(function (response) {
           // handle success
           console.log(response);
@@ -567,8 +567,63 @@ class TruthCapture extends React.Component {
   }
 
   handleTestify(content, speaker_id) {
-    // TODO: refactor
-    // code    
+    // for user feedback
+    let message = "";
+    // establish that a speaker_id was input
+    if (speaker_id) {
+      // establish that the input speaker_id is valid
+      if (this.speakerExists(speaker_id)) {
+        // a speaker with this speaker_id does exist!
+        // post truth URL
+        let postTruthURL = "http://localhost:5000/api/speakers/" + speaker_id + "/truths";
+        // establish that content (text) was input
+        if (content) {
+          // check for duplicate (identical truth content, same speaker)
+          if (this.truthTwinExists(content, speaker_id)) {
+            // this truth has already been shared by this speaker, do not create
+            message = "Error: a truth with the content: \n\n" + content + "\n\n has already been created for this speaker";
+            console.log(message);
+            alert(message);
+          } else {
+            speaker_id = parseInt(speaker_id);
+            // no duplicate! add new truth!
+            axios.post(postTruthURL, {
+              content: content,
+              speaker_id: speaker_id
+            })
+            .then(function (response) {
+              // handle success
+              console.log(response);
+            })
+            .catch(function (error) {
+              // handle error
+              console.log(error);
+            });
+            // set state (frontend) to match updated database (backend)
+            this.mountTruths();
+            // report success to user (TODO: report it with the NAME of the speaker and the ID of the newly created truth)
+            message = "Truth successfully added for speaker #" + speaker_id + ": \n\n" + content;
+            console.log(message);
+            alert(message);
+          }
+        } else {
+          // no content (text) input
+          message = "Error: no truth content";
+          console.log(message);
+          alert(message);
+        }
+      } else {
+        // no speaker found for input speaker_id
+        message = "Error: no speaker exists for speaker ID: " + speaker_id;
+        console.log(message);
+        alert(message);
+      }      
+    } else {
+      // no speaker_id input
+      message = "Error: no speaker ID input";
+      console.log(message);
+      alert(message);
+    }
   }
 
   handleUpdateTruth(content, speaker_id, truth_id) {
