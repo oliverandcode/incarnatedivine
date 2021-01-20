@@ -317,6 +317,8 @@ class TruthCapture extends React.Component {
     this.handleDeleteTruth = this.handleDeleteTruth.bind(this);
   }
 
+  // const baseURL = "http://localhost:5000/api/";
+
   speakerExists(speaker_id) {
     let speakers = this.state.allSpeakers.slice();
     let speakerIDs = speakers.map(speaker => speaker.speaker_id);
@@ -492,7 +494,7 @@ class TruthCapture extends React.Component {
     // TODO: instead of deleting truths belonging to speaker, reassign them to "Anonymous" - write a reassignation function
     // load the speakers data (unnecessary?)
     this.mountSpeakers();
-    // for feedback
+    // for user feedback
     var message = "";
     // establish that a speaker_id was input
     if (speaker_id) {
@@ -522,19 +524,20 @@ class TruthCapture extends React.Component {
         console.log(message);
         alert(message);
       } else {
-        // no speaker with this speaker_id
-        message = "error: speaker #" + speaker_id + " not found";
+        // no speaker with this speaker_id exists
+        message = "Error: speaker #" + speaker_id + " not found";
         console.log(message);
         alert(message);
       }
     } else {
       // no speaker_id input
-      message = "error: no speaker_id received";
+      message = "Error: no speaker ID received";
       console.log(message);
       alert(message);
     }
   }
 
+  // TODO: make sure it checks speaker_id
   truthExists(truth_id, speaker_id) {
     // TODO: make sure function accounts for edge case where a truth is somehow created that has a duplicate truth_id but is assigned to a different speaker and is in fact unique? not supposed to happen. anyway, always look up truths by both speaker_id and truth_id?
     let archiveExist = this.state.allTruths.slice();
@@ -573,7 +576,7 @@ class TruthCapture extends React.Component {
     if (speaker_id) {
       // establish that the input speaker_id is valid
       if (this.speakerExists(speaker_id)) {
-        // a speaker with this speaker_id does exist!
+        // speaker found for input speaker_id! proceed
         // post truth URL
         let postTruthURL = "http://localhost:5000/api/speakers/" + speaker_id + "/truths";
         // establish that content (text) was input
@@ -614,13 +617,13 @@ class TruthCapture extends React.Component {
         }
       } else {
         // no speaker found for input speaker_id
-        message = "Error: no speaker exists for speaker ID: " + speaker_id;
+        message = "Error: speaker #" + speaker_id + " not found";
         console.log(message);
         alert(message);
       }      
     } else {
       // no speaker_id input
-      message = "Error: no speaker ID input";
+      message = "Error: no speaker ID received";
       console.log(message);
       alert(message);
     }
@@ -631,9 +634,68 @@ class TruthCapture extends React.Component {
     // code
   }
 
-  handleDeleteTruth(inputID) {
+  handleDeleteTruth(speaker_id, truth_id) {
     // TODO: refactor
     // code
+    // load the speakers data (unnecessary?)
+    this.mountTruths();
+    // baseURL
+    const baseURL = "http://localhost:5000/api";
+    // for user feedback
+    var message = "";
+    // establish that a speaker_id was input
+    if (speaker_id) {
+      // proceed
+      // establish that a truth_id was input
+      if (truth_id) {
+        // proceed
+        // establish that the input speaker_id is valid
+        if (this.speakerExists(speaker_id)) {
+          // speaker found for input speaker_id! proceed
+          // establish that truth exists
+          if (this.truthExists(truth_id, speaker_id)) {
+            // truth exists! proceed
+            let deleteTruthURL = baseURL + "/speakers/" + speaker_id + "/truths/" + truth_id;
+            // TODO: get speaker name and truth content, for user feedback
+            message = "Are you sure you want to delete truth #" + truth_id + " for speaker #" + speaker_id + " from the Archive?";
+            alert(message);
+            // delete truth
+            axios.delete(deleteTruthURL)
+            .then(function (response) {
+              // handle success
+              console.log(response);
+            })
+            .catch(function (error) {
+              // handle error
+              console.log(error);
+            })
+            message = "Truth #" + truth_id + " for speaker #" + speaker_id + " was deleted from the Archive.";
+            console.log(message);
+            alert(message);
+          } else {
+            // truth with these IDs not found
+            message = "Truth #" + truth_id + " not found";
+            console.log(message);
+            alert(message);
+          }
+        } else {
+          // no speaker found for input speaker_id
+          message = "Error: speaker #" + speaker_id + " not found";
+          console.log(message);
+          alert(message);
+        }
+      } else {
+        // no truth_id input
+        message = "Error: no truth ID received";
+        console.log(message);
+        alert(message);
+      }
+    } else {
+      // no speaker_id input
+      message = "Error: no speaker ID received";
+      console.log(message);
+      alert(message);
+    }
   }
 
   async mountSpeakers() {
