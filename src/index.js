@@ -686,8 +686,11 @@ class TruthCapture extends React.Component {
           if (this.truthExists(truth_id, speaker_id)) {
             // truth exists! proceed
             let deleteTruthURL = baseURL + "/speakers/" + speaker_id + "/truths/" + truth_id;
-            // TODO: get speaker name and truth content, for user feedback
-            message = "Are you sure you want to delete truth #" + truth_id + " for speaker #" + speaker_id + " from the Archive?";
+            // get speaker name and truth content, for user feedback
+            let thisTruth = this.findTruthByID(truth_id);
+            let truthContent = thisTruth.content;
+            let truthSpeaker = thisTruth.speaker.name;
+            message = "Are you sure you want to delete truth #" + truth_id + ": \n\n" + truthContent + "\n\nfor speaker #" + speaker_id + " \"" + truthSpeaker + "\" from the Archive?";
             alert(message);
             // delete truth
             axios.delete(deleteTruthURL)
@@ -699,7 +702,7 @@ class TruthCapture extends React.Component {
               // handle error
               console.log(error);
             })
-            message = "Truth #" + truth_id + " for speaker #" + speaker_id + " was deleted from the Archive.";
+            message = "Truth #" + truth_id + ": \n\n" + truthContent + "\n\nfor speaker #" + speaker_id + " \"" + truthSpeaker + "\" was deleted from the Archive.";
             console.log(message);
             alert(message);
           } else {
