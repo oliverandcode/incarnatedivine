@@ -343,7 +343,7 @@ class TruthCapture extends React.Component {
   }
 
   findSpeakerByID(speaker_id) {
-    // this function looks up a speaker by its speaker_id, and if it exists, returns the speaker object
+    // this function looks up a speaker object by its speaker_id, and if it exists, returns the speaker object
     this.mountSpeakers();
     let speakers = this.state.allSpeakers.slice();
     let speakerIDs = speakers.map(speaker => speaker.speaker_id);
@@ -537,22 +537,53 @@ class TruthCapture extends React.Component {
     }
   }
 
-  // TODO: make sure it checks speaker_id
   truthExists(truth_id, speaker_id) {
-    // TODO: make sure function accounts for edge case where a truth is somehow created that has a duplicate truth_id but is assigned to a different speaker and is in fact unique? not supposed to happen. anyway, always look up truths by both speaker_id and truth_id?
+    // this function looks up a truh object using the input truth_id AND speaker_id, and returns True if the input truth_id belongs to an existing truth object AND the input speaker_id refers to the speaker object associated with that truth object; otherwise, it returns False.
     let archiveExist = this.state.allTruths.slice();
     let truthIDarray = archiveExist.map(truth => truth.truth_id);
     let i = truthIDarray.indexOf(parseInt(truth_id));
+    let message = "";
     if (truthIDarray[i]) {
-      return true;
+      // valid truth_id: proceed
+      // does the speaker_id associated with this truth match the input speaker_id?
+      let thisTruth = this.findTruthByID(truth_id);
+      if (parseInt(speaker_id) === thisTruth.speaker.speaker_id) {
+        // match!
+        return true;
+      } else {
+        // truth exists, but that was the wrong speaker_id for this truth
+        message = "Incompatible truth ID and speaker ID";
+        console.log(message);
+        return false;
+      }
     } else {
+      // input truth_id not found
       return false;
     }
   }
 
+  findTruthByID(truth_id) {
+    // this function looks up a truth object by its truth_id, and if it exists, returns the truth object
+    this.mountTruths();
+    let truths = this.state.allTruths.slice();
+    let truthIDs = truths.map(truth => truth.truth_id);
+    let i = truthIDs.indexOf(parseInt(truth_id));
+    let thisTruth = truths[i];
+    let message = "";
+    if (thisTruth) {
+      // successfully identified a truth object
+      message = "Truth object found: " + thisTruth.content;
+      console.log(message);
+      return thisTruth;
+    } else {
+      // did not find truth object
+      message = "No truth found for truth_id: " + truth_id;
+      console.log(message);
+      return undefined;
+    }
+  }
+
   truthTwinExists(content, speaker_id) {
-    // TODO: refactor
-    // code
     let speakers = this.state.allSpeakers.slice();
     // find the speaker
     let thisSpeaker = this.findSpeakerByID(parseInt(speaker_id));
@@ -634,9 +665,8 @@ class TruthCapture extends React.Component {
     // code
   }
 
+  // TODO: retrieve speaker name and truth content for success message
   handleDeleteTruth(speaker_id, truth_id) {
-    // TODO: refactor
-    // code
     // load the speakers data (unnecessary?)
     this.mountTruths();
     // baseURL
@@ -674,7 +704,7 @@ class TruthCapture extends React.Component {
             alert(message);
           } else {
             // truth with these IDs not found
-            message = "Truth #" + truth_id + " not found";
+            message = "Error: Truth #" + truth_id + " for speaker #" + speaker_id + " not found";
             console.log(message);
             alert(message);
           }
