@@ -109,7 +109,7 @@ class SpeakerEntry extends React.Component {
           </label>
           <br />
           <input type="button" value="Create" onClick={(e) => this.props.onCreateSpeaker(this.state.name)} /> {/* TODO: write function for CreateSpeaker */}
-          <input type="button" value="Update" onClick={(e) => this.props.onUpdateSpeaker(this.state.name, this.state.speaker_id)} /> {/* TODO: write function for UpdateSpeaker */}
+          <input type="button" value="Update" onClick={(e) => this.props.onUpdateSpeaker(this.state.speaker_id, this.state.name)} /> {/* TODO: write function for UpdateSpeaker */}
           <input type="button" value="Delete" onClick={(e) => this.props.onDeleteSpeaker(this.state.speaker_id)} /> {/* TODO: write function for DeleteSpeaker */}
         </form>
       </div>
@@ -317,7 +317,7 @@ class TruthCapture extends React.Component {
     this.handleDeleteTruth = this.handleDeleteTruth.bind(this);
   }
 
-  // const baseURL = "http://localhost:5000/api/";
+  // const baseURL = "http://localhost:5000/api";
 
   speakerExists(speaker_id) {
     let speakers = this.state.allSpeakers.slice();
@@ -438,11 +438,11 @@ class TruthCapture extends React.Component {
 
   // TODO: bug with user feedback, not critical (see below)
   handleCreateSpeaker(name) {
-    // post URL
+    // post speaker URL
     let postSpeakerURL = "http://localhost:5000/api/speakers";
     // load the speakers data (unnecessary?)
     this.mountSpeakers();
-    // for feedback
+    // for user feedback
     let message = "";
     // establish that a name was input
     if (name) {
@@ -450,7 +450,7 @@ class TruthCapture extends React.Component {
       // check for duplicate
       if (this.speakerTwinExists(name)) {
         // oh dang, a speaker with this name already exists
-        message = "error: speaker with name \"" + name +"\" already exists";
+        message = "Error: A speaker with the name \"" + name + "\" already exists. Please enter a different name.";
         console.log(message);
         alert(message);
       } else {
@@ -473,25 +473,98 @@ class TruthCapture extends React.Component {
         let new_speaker_id = this.findSpeakerIDByName(name);
         // let new_speaker = this.findSpeakerByName(name);
         // report success to user
-        message = "speaker #" + new_speaker_id + " \"" + name + "\" was added to the database";
+        message = "Success: Speaker #" + new_speaker_id + " \"" + name + "\" was added to the database.";
         // message = "Speaker #" + new_speaker.speaker_id + " \"" + new_speaker.name + "\" was added to the database";
         console.log(message);
         alert(message);
       }
     } else {
       // no name input
-      message = "error: problem with name input"
+      message = "Error: Please enter a name.";
       console.log(message);
       alert(message);
     }
   }
 
-  handleUpdateSpeaker(name, speaker_id) {
+  handleUpdateSpeaker(speaker_id, name) {
     // TODO: write function
+    // load speakers data (unnecessary?)
+    this.mountSpeakers();
+    // baseURL
+    const baseURL = "http://localhost:5000/api";
+    // for user feedback
+    let message = "";
+    // establish that a speaker_id was input
+    if (speaker_id) {
+      // received speaker_id: proceed
+      // establish that a name was input
+      if (name) {
+        // received name: proceed
+        // does speaker exist?
+        if (this.speakerExists(speaker_id)) {
+          // speaker found for input speaker_id: proceed
+          // check for duplicate
+          if (!(this.speakerTwinExists(name))) {
+            // unique name: proceed
+            // update/put speaker URL
+            let putSpeakerURL = baseURL + "/speakers/" + speaker_id;
+            // get original speaker name for user feedback
+            let thisSpeaker = this.findSpeakerByID(speaker_id);
+            let old_speaker_name = thisSpeaker.name;
+            message = "Are you sure you want to update the name of speaker #" + speaker_id + " from \"" + old_speaker_name + "\" to \"" + name + "\"?";
+            alert(message);
+            // update speaker
+            axios.put(putSpeakerURL, {
+              name: name
+            })
+            .then(function (response) {
+              // handle success
+              console.log(response);
+            })
+            .catch(function (error) {
+              // handle error
+              console.log(error);
+            });
+            // reload speakers data
+            this.mountSpeakers();
+            // retrieve this speaker's new name
+            // BUG: this is not retrieving the NEW name but the OLD name. Not critical but I would like to fix it.
+            thisSpeaker = this.findSpeakerByID(speaker_id);
+            let new_speaker_name = thisSpeaker.name;
+            // report success to user
+            message = "Success: Speaker #" + speaker_id + " now has the name \"" + new_speaker_name + "\"";
+            console.log(message);
+            // temporary user feedback message until I can fix bug
+            message = "Success: Speaker #" + speaker_id + " now has the name \"" + name + "\"";
+            alert(message);
+          } else {
+            // speaker with this name already exists
+            message = "Error: A speaker with the name \"" + name + "\" already exists. Please enter a different name.";
+            console.log(message);
+            alert(message);
+          }
+        } else {
+          // no speaker with this speaker_id exists
+          message = "Error: Speaker #" + speaker_id + " not found";
+          console.log(message);
+          alert(message);
+        }
+      } else {
+        // no name received
+        message = "Error: Please enter a new name for this speaker";
+        console.log(message);
+        alert(message);
+      }
+    } else {
+      // no speaker_id received
+      message = "Error: Please enter the ID for the speaker you wish to update";
+      console.log(message);
+      alert(message);
+    }
   }
 
+  // TODO: instead of deleting truths belonging to speaker, reassign them to "Anonymous" - write a reassignation function
   handleDeleteSpeaker(speaker_id) {
-    // TODO: instead of deleting truths belonging to speaker, reassign them to "Anonymous" - write a reassignation function
     // load the speakers data (unnecessary?)
     this.mountSpeakers();
     // for user feedback
@@ -525,12 +598,12 @@ class TruthCapture extends React.Component {
         alert(message);
       } else {
         // no speaker with this speaker_id exists
-        message = "Error: speaker #" + speaker_id + " not found";
+        message = "Error: Speaker #" + speaker_id + " not found";
         console.log(message);
         alert(message);
       }
     } else {
-      // no speaker_id input
+      // no speaker_id received
       message = "Error: no speaker ID received";
       console.log(message);
       alert(message);
@@ -562,6 +635,7 @@ class TruthCapture extends React.Component {
     }
   }
 
+  // note: a truth object is always supposed to be assigned a unique truth_id upon creation, but what if an error occurs? should this function look up by speaker_id as well as truth_id?
   findTruthByID(truth_id) {
     // this function looks up a truth object by its truth_id, and if it exists, returns the truth object
     this.mountTruths();
@@ -665,7 +739,6 @@ class TruthCapture extends React.Component {
     // code
   }
 
-  // TODO: retrieve speaker name and truth content for success message
   handleDeleteTruth(speaker_id, truth_id) {
     // load the speakers data (unnecessary?)
     this.mountTruths();
@@ -701,8 +774,9 @@ class TruthCapture extends React.Component {
             .catch(function (error) {
               // handle error
               console.log(error);
-            })
-            message = "Truth #" + truth_id + ": \n\n" + truthContent + "\n\nfor speaker #" + speaker_id + " \"" + truthSpeaker + "\" was deleted from the Archive.";
+            });
+            // report success to user
+            message = "Success: Truth #" + truth_id + ": \n\n" + truthContent + "\n\nfor speaker #" + speaker_id + " \"" + truthSpeaker + "\" was deleted from the Archive.";
             console.log(message);
             alert(message);
           } else {
