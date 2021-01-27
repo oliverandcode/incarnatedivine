@@ -440,7 +440,7 @@ class TruthCapture extends React.Component {
   handleCreateSpeaker(name) {
     // post speaker URL
     let postSpeakerURL = "http://localhost:5000/api/speakers";
-    // load the speakers data (unnecessary?)
+    // load the speakers data
     this.mountSpeakers();
     // for user feedback
     let message = "";
@@ -480,15 +480,15 @@ class TruthCapture extends React.Component {
       }
     } else {
       // no name input
-      message = "Error: Please enter a name.";
+      message = "Error: No name received. Please enter a name.";
       console.log(message);
       alert(message);
     }
   }
 
+  // TODO: bug with user feedback on success, not critical, same as handleCreateSpeaker (see notes)
   handleUpdateSpeaker(speaker_id, name) {
-    // TODO: write function
-    // load speakers data (unnecessary?)
+    // load speakers data
     this.mountSpeakers();
     // baseURL
     const baseURL = "http://localhost:5000/api";
@@ -508,10 +508,10 @@ class TruthCapture extends React.Component {
             // unique name: proceed
             // update/put speaker URL
             let putSpeakerURL = baseURL + "/speakers/" + speaker_id;
-            // get original speaker name for user feedback
+            // get old speaker name for user feedback
             let thisSpeaker = this.findSpeakerByID(speaker_id);
-            let old_speaker_name = thisSpeaker.name;
-            message = "Are you sure you want to update the name of speaker #" + speaker_id + " from \"" + old_speaker_name + "\" to \"" + name + "\"?";
+            let oldSpeakerName = thisSpeaker.name;
+            message = "Are you sure you want to update the name of speaker #" + speaker_id + " from \"" + oldSpeakerName + "\" to \"" + name + "\"?";
             alert(message);
             // update speaker
             axios.put(putSpeakerURL, {
@@ -530,9 +530,9 @@ class TruthCapture extends React.Component {
             // retrieve this speaker's new name
             // BUG: this is not retrieving the NEW name but the OLD name. Not critical but I would like to fix it.
             thisSpeaker = this.findSpeakerByID(speaker_id);
-            let new_speaker_name = thisSpeaker.name;
+            let newSpeakerName = thisSpeaker.name;
             // report success to user
-            message = "Success: Speaker #" + speaker_id + " now has the name \"" + new_speaker_name + "\"";
+            message = "Success: Speaker #" + speaker_id + " now has the name \"" + newSpeakerName + "\"";
             console.log(message);
             // temporary user feedback message until I can fix bug
             message = "Success: Speaker #" + speaker_id + " now has the name \"" + name + "\"";
@@ -544,20 +544,20 @@ class TruthCapture extends React.Component {
             alert(message);
           }
         } else {
-          // no speaker with this speaker_id exists
-          message = "Error: Speaker #" + speaker_id + " not found";
+          // did not find speaker for input speaker_id
+          message = "Error: Speaker #" + speaker_id + " not found. Please enter a valid speaker ID.";
           console.log(message);
           alert(message);
         }
       } else {
-        // no name received
-        message = "Error: Please enter a new name for this speaker";
+        // did not receive name
+        message = "Error: No name received. Please enter a new name for this speaker.";
         console.log(message);
         alert(message);
       }
     } else {
-      // no speaker_id received
-      message = "Error: Please enter the ID for the speaker you wish to update";
+      // did not receive speaker_id
+      message = "Error:  No speaker ID received. Please enter the ID for the speaker you wish to update.";
       console.log(message);
       alert(message);
     }
@@ -565,18 +565,18 @@ class TruthCapture extends React.Component {
 
   // TODO: instead of deleting truths belonging to speaker, reassign them to "Anonymous" - write a reassignation function
   handleDeleteSpeaker(speaker_id) {
-    // load the speakers data (unnecessary?)
+    // load the speakers data
     this.mountSpeakers();
     // for user feedback
     var message = "";
     // establish that a speaker_id was input
     if (speaker_id) {
-      // proceed
-      // delete URL
+      // received speaker_id: proceed
+      // delete speaker URL
       let deleteSpeakerURL = "http://localhost:5000/api/speakers/" + speaker_id;
-      // check to see if a speaker with this speaker_id exists
+      // establish that input speaker_id is valid
       if (this.speakerExists(speaker_id)) {
-        // speaker found for input speaker_id! proceed
+        // valid speaker_id: proceed
         let speakers = this.state.allSpeakers.slice();
         let speakerIDs = speakers.map(speaker => speaker.speaker_id);
         let i = speakerIDs.indexOf(parseInt(speaker_id));
@@ -593,18 +593,19 @@ class TruthCapture extends React.Component {
           // handle error
           console.log(error);
         })
-        message = "Speaker #" + speaker_id + " (" + thisSpeaker.name + ") was successfully deleted.";
+        // report success to user
+        message = "Success: Speaker #" + speaker_id + " \"" + thisSpeaker.name + "\" was deleted.";
         console.log(message);
         alert(message);
       } else {
-        // no speaker with this speaker_id exists
-        message = "Error: Speaker #" + speaker_id + " not found";
+        // did not find speaker for input speaker_id
+        message = "Error: Speaker #" + speaker_id + " not found. Please enter a valid speaker ID.";
         console.log(message);
         alert(message);
       }
     } else {
-      // no speaker_id received
-      message = "Error: no speaker ID received";
+      // did not receive speaker_id
+      message = "Error: No speaker ID received. Please enter a speaker ID.";
       console.log(message);
       alert(message);
     }
@@ -658,6 +659,7 @@ class TruthCapture extends React.Component {
   }
 
   truthTwinExists(content, speaker_id) {
+    // this function retrieves the speaker associated with the input speaker_id, and then retrieves the array of truth objects associated with that speaker. If the input content is identical to the content of any of those truth objects, the function returns True. If not, the function returns False.
     let speakers = this.state.allSpeakers.slice();
     // find the speaker
     let thisSpeaker = this.findSpeakerByID(parseInt(speaker_id));
@@ -675,6 +677,8 @@ class TruthCapture extends React.Component {
   }
 
   handleTestify(content, speaker_id) {
+    // load truths data
+    this.mountTruths();
     // for user feedback
     let message = "";
     // establish that a speaker_id was input
@@ -689,7 +693,7 @@ class TruthCapture extends React.Component {
           // check for duplicate (identical truth content, same speaker)
           if (this.truthTwinExists(content, speaker_id)) {
             // this truth has already been shared by this speaker, do not create
-            message = "Error: a truth with the content: \n\n" + content + "\n\n has already been created for this speaker";
+            message = "Error: A truth with the text: \n\n" + content + "\n\n has already been created for this speaker.";
             console.log(message);
             alert(message);
           } else {
@@ -710,37 +714,127 @@ class TruthCapture extends React.Component {
             // set state (frontend) to match updated database (backend)
             this.mountTruths();
             // report success to user (TODO: report it with the NAME of the speaker and the ID of the newly created truth)
-            message = "Truth successfully added for speaker #" + speaker_id + ": \n\n" + content;
+            message = "Success: New truth added for speaker #" + speaker_id + ": \n\n" + content;
             console.log(message);
             alert(message);
           }
         } else {
-          // no content (text) input
-          message = "Error: no truth content";
+          // did not receive content (text)
+          message = "Error: No content (text) received. Please enter text for this truth.";
           console.log(message);
           alert(message);
         }
       } else {
-        // no speaker found for input speaker_id
-        message = "Error: speaker #" + speaker_id + " not found";
+        // did not find speaker for input speaker_id
+        message = "Error: Speaker #" + speaker_id + " not found. Please enter a valid speaker ID.";
         console.log(message);
         alert(message);
       }      
     } else {
-      // no speaker_id input
-      message = "Error: no speaker ID received";
+      // did not receive speaker_id
+      message = "Error: No speaker ID received. Please enter a speaker ID.";
       console.log(message);
       alert(message);
     }
   }
 
+  // TODO: bug with user feedback on success, not critical, same as above (see notes)
   handleUpdateTruth(content, speaker_id, truth_id) {
-    // TODO: refactor
-    // code
+    // load truths data
+    this.mountTruths();
+    // baseURL
+    const baseURL = "http://localhost:5000/api";
+    // for user feedback
+    let message = "";
+    // establish that speaker_id was input
+    if (speaker_id) {
+      // received speaker_id: proceed
+      // establish that truth_id was input
+      if (truth_id) {
+        // received truth_id: proceed
+        // establish that content was input
+        if (content) {
+          // received content: proceed
+          // establish that input speaker_id is valid
+          if (this.speakerExists(speaker_id)) {
+            // valid speaker_id: proceed
+            // establish that truth exists
+            if (this.truthExists(truth_id, speaker_id)) {
+              // truth exists: proceed
+              // check for duplicate
+              if (!(this.truthTwinExists(content, speaker_id))) {
+                // unique truth content for this speaker: proceed
+                // update/put truth URL
+                let putTruthURL = baseURL + "/speakers/" + speaker_id + "/truths/" + truth_id;
+                // get speaker name and old truth content, for user feedback
+                let thisTruth = this.findTruthByID(truth_id);
+                let oldTruthContent = thisTruth.content;
+                let truthSpeaker = thisTruth.speaker.name;
+                message = "Are you sure you want to update the content (text) of truth #" + truth_id + " for speaker #" + speaker_id + " \"" + truthSpeaker + "\"? \n\nOld content: \n\n" + oldTruthContent + "\n\nwill be updated to: \n\n" + content;
+                alert(message);
+                // update truth
+                axios.put(putTruthURL, {
+                  content: content
+                })
+                .then(function (response) {
+                  // handle success
+                  console.log(response);
+                })
+                .catch(function (error) {
+                  // handle error
+                  console.log(error);
+                });
+                // reload truths data
+                this.mountTruths();
+                // retrieve truth's new content
+                thisTruth = this.findTruthByID(truth_id);
+                let newtruthContent = thisTruth.content;
+                // report success to user
+                message = "Success: The content (text) of truth #" + truth_id + " for speaker #" + speaker_id + " \"" + truthSpeaker + "\" has been updated to: \n\n" + newtruthContent;
+                console.log(message);
+                // temporary user feedback message until I can fix bug
+                message = "Success: The content (text) of truth #" + truth_id + " for speaker #" + speaker_id + " \"" + truthSpeaker + "\" has been updated to: \n\n" + content;
+                alert(message);
+              } else {
+                // a truth with this content already exists for this speaker
+                message = "Error: A truth with the text: \n\n" + content + "\n\n has already been created for this speaker.";
+                console.log(message);
+                alert(message);
+              }
+            } else {
+              // did not find truth with these IDs
+              message = "Error: Truth #" + truth_id + " for speaker #" + speaker_id + " not found. Please enter a valid truth ID/speaker ID combination.";
+              console.log(message);
+              alert(message);
+            }
+          } else {
+            // did not find speaker for input speaker_id
+            message = "Error: Speaker #" + speaker_id + " not found. Please enter a valid speaker ID.";
+            console.log(message);
+            alert(message);
+          }
+        } else {
+          // did not receive content (text)
+          message = "Error: No content (text) received. Please enter new text for this truth.";
+          console.log(message);
+          alert(message);
+        }
+      } else {
+        // did not receive truth_id
+        message = "Error: No truth ID received. Please enter a truth ID.";
+        console.log(message);
+        alert(message);
+      }
+    } else {
+      // did not receive speaker_id
+      message = "Error: No speaker ID received. Please enter a speaker ID.";
+      console.log(message);
+      alert(message);
+    }
   }
 
   handleDeleteTruth(speaker_id, truth_id) {
-    // load the speakers data (unnecessary?)
+    // load the truths data
     this.mountTruths();
     // baseURL
     const baseURL = "http://localhost:5000/api";
@@ -748,16 +842,17 @@ class TruthCapture extends React.Component {
     var message = "";
     // establish that a speaker_id was input
     if (speaker_id) {
-      // proceed
+      // received speaker_id: proceed
       // establish that a truth_id was input
       if (truth_id) {
-        // proceed
+        // received truth_id: proceed
         // establish that the input speaker_id is valid
         if (this.speakerExists(speaker_id)) {
-          // speaker found for input speaker_id! proceed
+          // valid speaker_id: proceed
           // establish that truth exists
           if (this.truthExists(truth_id, speaker_id)) {
             // truth exists! proceed
+            // delete truth URL
             let deleteTruthURL = baseURL + "/speakers/" + speaker_id + "/truths/" + truth_id;
             // get speaker name and truth content, for user feedback
             let thisTruth = this.findTruthByID(truth_id);
@@ -780,26 +875,26 @@ class TruthCapture extends React.Component {
             console.log(message);
             alert(message);
           } else {
-            // truth with these IDs not found
-            message = "Error: Truth #" + truth_id + " for speaker #" + speaker_id + " not found";
+            // did not find truth with these IDs
+            message = "Error: Truth #" + truth_id + " for speaker #" + speaker_id + " not found. Please enter a valid truth ID/speaker ID combination.";
             console.log(message);
             alert(message);
           }
         } else {
-          // no speaker found for input speaker_id
-          message = "Error: speaker #" + speaker_id + " not found";
+          // did not find speaker for input speaker_id
+          message = "Error: Speaker #" + speaker_id + " not found. Please enter a valid speaker ID.";
           console.log(message);
           alert(message);
         }
       } else {
-        // no truth_id input
-        message = "Error: no truth ID received";
+        // did not receive truth_id
+        message = "Error: No truth ID received. Please enter a truth ID.";
         console.log(message);
         alert(message);
       }
     } else {
-      // no speaker_id input
-      message = "Error: no speaker ID received";
+      // did not receive speaker_id
+      message = "Error: No speaker ID received. Please enter a speaker ID.";
       console.log(message);
       alert(message);
     }
