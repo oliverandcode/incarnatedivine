@@ -320,14 +320,16 @@ class TruthCapture extends React.Component {
   // const baseURL = "http://localhost:5000/api";
 
   speakerExists(speaker_id) {
+    // this function retrieves all the speaker_id data. If the input speaker_id is included in that data, the function returns true. If it is not, the function returns false.
+    // reload speaker data
+    this.mountSpeakers();
+    // convert speaker_id input to int, if it isn't already
+    speaker_id = parseInt(speaker_id);
+    // array of all speaker objects
     let speakers = this.state.allSpeakers.slice();
+    // array of IDs for all speaker objects
     let speakerIDs = speakers.map(speaker => speaker.speaker_id);
-    let i = speakerIDs.indexOf(parseInt(speaker_id));
-    if (speakerIDs[i]) {
-      return true;
-    } else {
-      return false;
-    }
+    return (speakerIDs.includes(speaker_id));
   }
 
   speakerTwinExists(name) {
@@ -612,26 +614,24 @@ class TruthCapture extends React.Component {
   }
 
   truthExists(truth_id, speaker_id) {
-    // this function looks up a truh object using the input truth_id AND speaker_id, and returns True if the input truth_id belongs to an existing truth object AND the input speaker_id refers to the speaker object associated with that truth object; otherwise, it returns False.
-    let archiveExist = this.state.allTruths.slice();
-    let truthIDarray = archiveExist.map(truth => truth.truth_id);
-    let i = truthIDarray.indexOf(parseInt(truth_id));
-    let message = "";
-    if (truthIDarray[i]) {
-      // valid truth_id: proceed
-      // does the speaker_id associated with this truth match the input speaker_id?
-      let thisTruth = this.findTruthByID(truth_id);
-      if (parseInt(speaker_id) === thisTruth.speaker.speaker_id) {
-        // match!
-        return true;
-      } else {
-        // truth exists, but that was the wrong speaker_id for this truth
-        message = "Incompatible truth ID and speaker ID";
-        console.log(message);
-        return false;
-      }
+    // this function returns true if the input IDs are both valid AND the truth_id indicates a truth object that is associated with a speaker object indicated by the speaker_id. If either ID is invalid, or the ID combination is invalid, it returns false.
+    // reload speaker data
+    this.mountSpeakers();
+    // convert ID inputs to int, if they aren't already
+    speaker_id = parseInt(speaker_id);
+    truth_id = parseInt(truth_id);
+    // establish that speaker_id is valid
+    if (this.speakerExists(speaker_id)) {
+      // get the speaker object
+      let thisSpeaker = this.findSpeakerByID(speaker_id);
+      // array of all truth objects associated with this speaker
+      let speakerTruths = thisSpeaker.truths;
+      // array of IDs for all truth objects associated with this speaker
+      let speakerTruthIDs = speakerTruths.map(truth => truth.truth_id);
+      return (speakerTruthIDs.includes(truth_id));
     } else {
-      // input truth_id not found
+      // invalid speaker_id
+      console.log("invalid speaker_id");
       return false;
     }
   }
